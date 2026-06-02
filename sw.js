@@ -1,7 +1,7 @@
 /* 슬기로운 NCR — service worker
    전략: 화면(HTML)은 network-first → 온라인이면 항상 최신 반영,
         오프라인이면 캐시 폴백. 기타 자원은 stale-while-revalidate. */
-const VERSION = 'ncr-v4';
+const VERSION = 'ncr-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {

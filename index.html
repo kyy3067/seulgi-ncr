@@ -74,9 +74,9 @@ input,textarea{font-family:inherit;}
 .brand-loc{display:flex; align-items:center; gap:4px; font-size:12.5px; color:var(--subtext); font-weight:600;}
 .brand-loc .msr{color:var(--accent);}
 
-.content{flex:1; overflow-y:auto; padding-bottom:8px;}
+.content{flex:1; overflow-y:auto; padding-bottom:8px; display:flex; flex-direction:column;}
 .view{display:none;}
-.view.active{display:block; animation:screenIn .28s ease;}
+.view.active{display:flex; flex-direction:column; flex:1 1 auto; animation:screenIn .28s ease;}
 
 /* ===== Headers ===== */
 .screen-head{padding:8px 20px 14px;}
@@ -100,7 +100,13 @@ input,textarea{font-family:inherit;}
 .chip-row{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 12px;}
 
 /* ===== Exchange ===== */
-.ex-wrap{padding:4px 16px 24px;}
+.ex-wrap{padding:4px 16px 24px; display:flex; flex-direction:column; flex:1;}
+.ex-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:8px 4px 14px;}
+.ex-head h1{margin:0; font-size:26px; font-weight:var(--head-weight); letter-spacing:-.02em; color:var(--text);}
+.ex-head p{margin:4px 0 0; font-size:13.5px; color:var(--subtext);}
+.reset-top{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--surface); color:var(--subtext); border-radius:999px; padding:7px 13px; font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; flex-shrink:0; margin-top:4px;}
+.reset-top:active{background:var(--surface2);}
+.reset-top .msr{color:var(--subtext);}
 .install-btn{
   width:100%; height:48px; border:none; border-radius:var(--radius-sm); background:var(--accent); color:var(--accent-ink);
   font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:14px;
@@ -136,7 +142,7 @@ input,textarea{font-family:inherit;}
 .rate-status .msr{color:var(--subtext);}
 .rate-status .txt{font-size:12.5px; color:var(--subtext); flex:1;}
 .rate-refresh{display:inline-flex; align-items:center; gap:5px; border:none; background:transparent; color:var(--accent); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;}
-.ex-tip-card{margin-top:16px; padding:16px 18px;}
+.ex-tip-card{margin-top:auto; padding:16px 18px;}
 .ex-tip-head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
 .ex-tip-head .msr{color:var(--accent);}
 .ex-tip-head span{font-size:14.5px; font-weight:700;}
@@ -165,9 +171,10 @@ input,textarea{font-family:inherit;}
 .ph span{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.3px; opacity:.7;}
 .pcard-body{flex:1; min-width:0; padding:13px 14px;}
 .pcard-name{font-size:16px; font-weight:700; letter-spacing:-.01em;}
-.pcard-sub{display:flex; align-items:center; gap:6px; margin-top:3px; color:var(--subtext); font-size:12.5px;}
+.pcard-sub{display:flex; align-items:center; gap:6px; margin-top:3px; color:var(--subtext); font-size:12.5px; flex-wrap:nowrap;}
 .pcard-sub .msr{color:var(--accent);}
-.pcard-sub .area{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.pcard-sub>span:not(.area){white-space:nowrap; flex-shrink:0;}
+.pcard-sub .area{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:1; min-width:0;}
 .pcard-meta{display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap;}
 .stars{display:inline-flex; align-items:center; gap:3px; color:var(--accent);}
 .stars b{font-weight:600; font-size:14px; color:var(--text);}
@@ -263,6 +270,46 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 /* ===== Toast ===== */
 .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); white-space:nowrap; pointer-events:none;}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* ===== Desktop (반응형) ===== */
+@media(min-width:900px){
+  body{align-items:flex-start;}
+  .app{
+    max-width:1080px; width:calc(100% - 48px); margin:24px auto;
+    height:calc(100vh - 48px); min-height:0;
+    display:grid; grid-template-columns:248px 1fr; grid-template-rows:auto 1fr;
+    grid-template-areas:"brand content" "nav content";
+    border-radius:24px; overflow:hidden; box-shadow:0 20px 60px rgba(20,22,45,.13);
+  }
+  .brandbar{grid-area:brand; position:static; padding:22px 20px 16px; border-bottom:1px solid var(--border);}
+  .brandbar .brand-loc{display:none;}
+  .bottomnav{
+    grid-area:nav; position:static; flex-direction:column; align-items:stretch; gap:4px;
+    border-top:none; border-right:1px solid var(--border); padding:14px 12px; background:var(--surface);
+  }
+  .bottomnav button{flex:0 0 auto; flex-direction:row; justify-content:flex-start; gap:12px; padding:12px 14px; border-radius:12px;}
+  .bottomnav button .msr{font-size:22px;}
+  .bottomnav button span{font-size:14px; font-weight:500;}
+  .bottomnav button.active{background:var(--accent-soft);}
+  .content{grid-area:content; padding-bottom:0;}
+  .fab{right:28px; bottom:28px;}
+  /* 환율: 가운데 정렬, 아래로 밀지 않음 */
+  .ex-wrap{max-width:560px; width:100%; margin:0 auto; flex:0 0 auto;}
+  .ex-tip-card{margin-top:16px;}
+  /* 넓은 패딩 */
+  .ex-head{padding-left:24px; padding-right:24px;}
+  .screen-head{padding-left:24px; padding-right:24px;}
+  .search-wrap{margin-left:24px; margin-right:24px;}
+  .chip-row{padding-left:24px; padding-right:24px;}
+  .list{display:grid; grid-template-columns:1fr 1fr; gap:14px; padding-left:24px; padding-right:24px;}
+  .goods-grid{grid-template-columns:repeat(3,1fr); padding-left:24px; padding-right:24px;}
+  /* 추가 시트: 데스크톱에선 가운데 모달 */
+  .sheet-overlay{align-items:center;}
+  .sheet{max-width:480px; border-radius:22px; max-height:86vh;}
+}
+@media(min-width:1200px){
+  .goods-grid{grid-template-columns:repeat(4,1fr);}
+}
 </style>
 </head>
 <body>
@@ -280,7 +327,10 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
         <button id="installBtn" class="install-btn" style="display:none"><span class="msr b" style="font-size:20px">install_mobile</span>홈 화면에 앱 설치</button>
         <div id="iosNote" class="ios-note">🍎 아이폰: 사파리 하단 <b>공유</b> → <b>"홈 화면에 추가"</b>로 앱처럼 설치할 수 있어요.</div>
 
-        <div class="screen-head" style="padding-left:4px;padding-right:4px"><h1>환율 계산기</h1><p>인도 루피 ↔ 대한민국 원</p></div>
+        <div class="ex-head">
+          <div><h1>환율 계산기</h1><p>인도 루피 ↔ 대한민국 원</p></div>
+          <button id="resetBtn" class="reset-top"><span class="msr b" style="font-size:16px">restart_alt</span>초기화</button>
+        </div>
 
         <div class="card">
           <div class="money">
@@ -290,11 +340,10 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
           </div>
           <div class="rate-divider">
             <div class="line"></div>
-            <button class="rate-pin" id="ratePin">
+            <div class="rate-pin" id="ratePin">
               <span class="msr b" style="font-size:15px">sync_alt</span>
               <span id="ratePinText">₹1 = 15.70원</span>
-              <span class="msr" style="font-size:14px;color:var(--subtext)">edit</span>
-            </button>
+            </div>
             <div class="line"></div>
           </div>
           <div class="money">
@@ -470,42 +519,23 @@ function switchTab(tab){
 /* ============ Exchange ============ */
 const inrInput=document.getElementById('inrInput');
 const krwOut=document.getElementById('krwOut');
-const ratePin=document.getElementById('ratePin');
 function renderRate(){
-  if(!ratePin.dataset.editing) document.getElementById('ratePinText').textContent='₹1 = '+fmt(state.rate,2)+'원';
+  document.getElementById('ratePinText').textContent='₹1 = '+fmt(state.rate,2)+'원';
   convert();renderQuick();
 }
 function convert(){const v=parseFloat(inrInput.value)||0;krwOut.textContent=fmt(v*state.rate,0);}
 inrInput.addEventListener('input',()=>{inrInput.value=inrInput.value.replace(/[^0-9.]/g,'');convert();});
+document.getElementById('resetBtn').addEventListener('click',()=>{inrInput.value='';convert();inrInput.focus();});
 function renderQuick(){
   const box=document.getElementById('quickRow');
   const amts=[100,500,1000,5000];
-  box.innerHTML=amts.map(a=>`<button class="chip" data-add="${a}">+₹${fmt(a)}</button>`).join('')
-    +`<button class="chip ico reset" data-reset="1">${icon('restart_alt','b',16)}초기화</button>`;
+  box.innerHTML=amts.map(a=>`<button class="chip" data-add="${a}">+₹${fmt(a)}</button>`).join('');
   box.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
     const cur=parseFloat(inrInput.value)||0;
     inrInput.value=String(Math.round((cur+(+b.dataset.add))*100)/100);
     convert();
   }));
-  box.querySelector('[data-reset]').addEventListener('click',()=>{inrInput.value='';convert();inrInput.focus();});
 }
-ratePin.addEventListener('click',()=>{
-  if(ratePin.dataset.editing)return;
-  ratePin.dataset.editing='1';
-  ratePin.innerHTML='<span style="font-size:13px;color:var(--subtext)">₹1 =</span><input id="ratePinInput" inputmode="decimal"><span style="font-size:13px">원</span>';
-  const inp=document.getElementById('ratePinInput');inp.value=state.rate;inp.focus();inp.select();
-  inp.addEventListener('click',e=>e.stopPropagation());
-  const commit=async()=>{
-    const v=parseFloat(inp.value);
-    if(v&&v>0){state.rate=v;await save(KEYS.rate,v);toast('환율이 저장되었어요');}
-    delete ratePin.dataset.editing;
-    ratePin.innerHTML='<span class="msr b" style="font-size:15px">sync_alt</span><span id="ratePinText"></span><span class="msr" style="font-size:14px;color:var(--subtext)">edit</span>';
-    renderRate();
-  };
-  inp.addEventListener('blur',commit);
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=state.rate;inp.blur();}});
-});
-
 /* ============ 실시간 환율 ============ */
 const FX_API='https://open.er-api.com/v6/latest/INR';
 const FX_BACKUP='https://api.frankfurter.app/latest?from=INR&to=KRW';
@@ -536,7 +566,12 @@ document.getElementById('fxRefresh').addEventListener('click',()=>fetchLiveRate(
 function buildPlaceCats(){
   const box=document.getElementById('placeCats');
   box.innerHTML=PLACE_CATS.map(c=>`<button class="chip ico${placeFilter===c.id?' active':''}" data-cat="${c.id}">${icon(c.icon,'b',17)}${esc(c.label)}</button>`).join('');
-  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{placeFilter=b.dataset.cat;buildPlaceCats();renderPlaces();}));
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    placeFilter=b.dataset.cat;
+    box.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.cat===placeFilter));
+    b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+    renderPlaces();
+  }));
 }
 const placeSearch=document.getElementById('placeSearch');
 placeSearch.addEventListener('input',()=>{placeQuery=placeSearch.value;document.getElementById('placeSearchClr').style.display=placeQuery?'flex':'none';renderPlaces();});
@@ -624,7 +659,12 @@ function buildTipCats(){
   const box=document.getElementById('tipCats');
   const cats=['전체',...TIP_CATS];
   box.innerHTML=cats.map(c=>`<button class="chip${tipFilter===c?' active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
-  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{tipFilter=b.dataset.cat;buildTipCats();renderTips();}));
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    tipFilter=b.dataset.cat;
+    box.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.cat===tipFilter));
+    b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+    renderTips();
+  }));
 }
 function tipCardHTML(t){
   return `<div class="card tcard">
@@ -793,6 +833,35 @@ function seed(){
   ];
 }
 
+/* ============ 추가 콘텐츠 (그레이터 노이다 · 신규 특산물) ============ */
+const GN_PLACES=[
+  {cat:'shop',name:'The Grand Venice Mall',addr:'Site 4, Greater Noida',price:'—',open:'11:00–23:00',review:'베네치아 운하 테마의 초대형 몰. 푸드코트·멀티플렉스·짚라인까지 있는 랜드마크.',stars:4.2},
+  {cat:'shop',name:'Omaxe Connaught Place',addr:'Beta II, Greater Noida',price:'—',open:'11:00–22:00',review:'코노트 플레이스를 본뜬 대형 쇼핑몰. 글로벌 브랜드와 가족 엔터테인먼트.',stars:4.1},
+  {cat:'sight',name:'Buddh International Circuit',addr:'Jaypee Greens Sports City, Greater Noida',price:'—',open:'이벤트 시 개방',review:'아시아 최초의 F1 서킷. 레이스·트랙데이 등 모터스포츠 명소.',stars:4.5},
+  {cat:'sight',name:'Surajpur Bird Sanctuary',addr:'Surajpur, Greater Noida',price:'무료',open:'일출–일몰',review:'철새·텃새가 모이는 습지. 조용한 새 관찰과 사진 명소.',stars:4.3},
+  {cat:'food',name:'Barbeque Nation',addr:'Gaur City Mall, Greater Noida West',price:'₹₹₹',open:'영업 중 · ~23:00',review:'테이블 직화 무제한 BBQ. 시크 케밥과 그릴로 인기.',stars:4.3},
+  {cat:'food',name:'Cafe Delhi Heights',addr:'Greater Noida',price:'₹₹₹',open:'영업 중 · ~23:00',review:'버거·파스타 등 푸짐한 캐주얼 다이닝. 양 많고 분위기 좋음.',stars:4.2},
+  {cat:'cafe',name:'Wat-a-Burger',addr:'Greater Noida West',price:'₹₹',open:'영업 중 · ~23:00',review:'인도식 수제버거 카페. 발랄하고 캐주얼한 분위기.',stars:4.1},
+  {cat:'cafe',name:'Uncle Frogs',addr:'Greater Noida West',price:'₹₹',open:'영업 중 · ~23:30',review:'트렌디한 레스토-카페. 디저트와 인테리어가 예쁨.',stars:4.2},
+  {cat:'bar',name:'Noidawery',addr:'Greater Noida West',price:'₹₹₹',open:'영업 중 · ~24:00',review:'그레이터 노이다 대표 수제맥주 펍.',stars:4.3},
+  {cat:'bar',name:'Gallontree',addr:'Pari Chowk, Greater Noida',price:'₹₹₹',open:'영업 중 · ~01:00',review:'파리 초크의 활기찬 바·다이닝. 멀티 퀴진과 바를 함께.',stars:4.2},
+  {cat:'care',name:'Sharda Hospital',addr:'Knowledge Park III, Greater Noida',price:'—',open:'24시간',review:'그레이터 노이다 대형 종합병원. 응급·국제진료 운영.',stars:4.0},
+];
+const NEW_GOODS=[
+  {name:'히말라야 립밤',desc:'천연 성분 립밤. 저렴하고 가벼워 선물용으로 인기.',shop:'약국·드러그스토어 / Himalaya 매장',price:'120'},
+  {name:'파티스마트 (Himalaya PartySmart)',desc:'음주 전후 챙기는 허브 캡슐. 여행자 사이에서 유명한 숙취 대비템.',shop:'약국·드러그스토어',price:'150'},
+  {name:'히말라야 넘 페이스워시',desc:'님(Neem) 성분 페이스워시. 트러블 케어로 스테디셀러.',shop:'약국·드러그스토어',price:'180'},
+];
+async function ensureContentV2(){
+  if(await load('ncr:contentV2',false))return;
+  const pn=new Set(state.places.map(p=>p.name));
+  GN_PLACES.forEach(p=>{if(!pn.has(p.name))state.places.push(Object.assign({id:uid(),contact:'',time:'',photo:null},p));});
+  const gn=new Set(state.products.map(g=>g.name));
+  NEW_GOODS.forEach(g=>{if(!gn.has(g.name))state.products.push(Object.assign({id:uid(),photo:null},g));});
+  await save(KEYS.places,state.places);await save(KEYS.products,state.products);
+  await save('ncr:contentV2',true);
+}
+
 /* ============ Init ============ */
 async function migrate(){
   // 이전 데이터 호환: cat 'spot' → 'sight'
@@ -813,6 +882,7 @@ async function init(){
     await save(KEYS.tips,state.tips);await save('ncr:seeded',true);
   }
   await migrate();
+  await ensureContentV2();
   renderRate();renderPlaces();renderGoods();renderTips();
   switchTab('exchange');
   fetchLiveRate();
