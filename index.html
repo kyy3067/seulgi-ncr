@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>슬기로운 NCR</title>
-<meta name="theme-color" content="#0047AB">
+<meta name="theme-color" content="#f4f5f8">
 <meta name="description" content="델리 수도권(NCR) 여행·생활 도우미">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -13,439 +13,355 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="슬기로운 NCR">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..0">
 <style>
 :root{
-  /* Cloud (White & Gray) */
-  --cloud-50:#FFFFFF; --cloud-100:#FAFAFA; --cloud-200:#F5F5F5;
-  --cloud-300:#E5E5E5; --cloud-400:#BDBDBD; --cloud-500:#9E9E9E;
-  /* Cobalt */
-  --cobalt-50:#E6EEF7; --cobalt-100:#B8CCE8; --cobalt-300:#6889C7;
-  --cobalt-500:#0047AB; --cobalt-700:#003580; --cobalt-900:#001F4D;
-  /* Gradient */
-  --gradient-signature:linear-gradient(135deg,#0047AB 0%,#FFFFFF 100%);
-  --gradient-button:linear-gradient(135deg,#0047AB 0%,#003580 100%);
-  --gradient-icon:linear-gradient(145deg,#2563C7 0%,#0047AB 50%,#003580 100%);
-  --gradient-surface:linear-gradient(180deg,#FFFFFF 0%,#F5F5F5 100%);
-  /* Functional */
-  --success:#2D9F65; --warning:#E8A33D; --error:#D14B4B;
-  /* Text */
-  --text-primary:#1A1A1A; --text-secondary:#555555; --text-tertiary:#888888;
-  /* Border */
-  --border-default:#E5E5E5; --border-focus:#0047AB;
-  /* Radius */
-  --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-xl:24px; --radius-full:9999px;
-  /* Shadow */
-  --shadow-1:0 1px 3px rgba(0,0,0,0.06);
-  --shadow-2:0 4px 12px rgba(0,0,0,0.06);
-  --shadow-3:0 8px 24px rgba(0,71,171,0.12);
-  --shadow-4:0 16px 48px rgba(0,0,0,0.16);
-  --shadow-3d:0 6px 16px rgba(0,71,171,0.25),0 2px 4px rgba(0,71,171,0.15),inset 0 2px 3px rgba(255,255,255,0.35),inset 0 -2px 3px rgba(0,0,0,0.18);
-  --ease-out:cubic-bezier(0.16,1,0.3,1);
-  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  /* ===== Mist (미스트) design tokens ===== */
+  --bg:#f4f5f8; --surface:#ffffff; --surface2:#eef0f4; --border:#e6e8ee;
+  --text:#191b22; --subtext:#71768a; --ok:#2f9e6e;
+  --accent:#5b63d3; --accent-ink:#ffffff;
+  --accent-soft:#ebecfa; --accent-shadow:rgba(91,99,211,.32);
+  --radius:18px; --radius-sm:12px; --chip-radius:999px;
+  --head-weight:800; --shadow:0 4px 16px rgba(20,22,45,.06);
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
 body{
-  font-family:'Pretendard','Inter',-apple-system,'Segoe UI',sans-serif;
-  background:var(--cloud-200);
-  color:var(--text-primary);
+  font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 800px at 20% -10%, #f0f1f6, transparent),
+    radial-gradient(1000px 700px at 100% 110%, #eef0f4, transparent),
+    #e9eaf0;
   -webkit-font-smoothing:antialiased;
   display:flex; justify-content:center;
 }
-/* App shell — 모바일 프레임 */
+.msr{
+  font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal;
+  line-height:1; display:inline-block; white-space:nowrap; direction:ltr;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; user-select:none;
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle;
+}
+.msr.fill{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;}
+.msr.b{font-variation-settings:'FILL' 0,'wght' 600,'GRAD' 0,'opsz' 24;}
+.msr.fb{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;}
+input,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+@keyframes screenIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:none;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ===== App shell ===== */
 .app{
-  width:100%; max-width:440px; min-height:100vh;
-  background:var(--cloud-200);
-  position:relative;
+  width:100%; max-width:440px; min-height:100vh; min-height:100dvh;
+  background:var(--bg); position:relative;
   display:flex; flex-direction:column;
-  box-shadow:0 0 60px rgba(0,71,171,0.06);
+  box-shadow:0 0 60px rgba(20,22,45,.06);
 }
+.brandbar{
+  display:flex; align-items:center; gap:9px; padding:12px 18px 8px;
+  padding-top:calc(12px + env(safe-area-inset-top)); background:var(--bg);
+  position:sticky; top:0; z-index:30; flex-shrink:0;
+}
+.brand-logo{
+  width:30px; height:30px; border-radius:9px; background:var(--accent-soft);
+  display:flex; align-items:center; justify-content:center; color:var(--accent);
+}
+.brand-name{font-size:16px; font-weight:800; letter-spacing:-.02em; flex:1;}
+.brand-loc{display:flex; align-items:center; gap:4px; font-size:12.5px; color:var(--subtext); font-weight:600;}
+.brand-loc .msr{color:var(--accent);}
 
-/* ===== Header ===== */
-.app-header{
-  position:sticky; top:0; z-index:50;
-  background:var(--gradient-signature);
-  padding:18px 20px 22px;
-  text-align:center;
-  border-bottom-left-radius:var(--radius-xl);
-  border-bottom-right-radius:var(--radius-xl);
-  box-shadow:var(--shadow-3);
-}
-.app-header h1{
-  font-size:22px; line-height:30px; font-weight:700; color:#fff;
-  letter-spacing:-0.5px; display:flex; align-items:center; justify-content:center; gap:8px;
-}
-.app-header .sub{font-size:12px; line-height:16px; font-weight:500; color:rgba(255,255,255,0.82); margin-top:4px;}
-.header-logo{
-  width:30px; height:30px; border-radius:9px;
-  background:rgba(255,255,255,0.92);
-  display:inline-flex; align-items:center; justify-content:center;
-  box-shadow:inset 0 2px 3px rgba(255,255,255,0.6),0 3px 8px rgba(0,0,0,0.18);
-  font-size:18px;
-}
+.content{flex:1; overflow-y:auto; padding-bottom:8px;}
+.view{display:none;}
+.view.active{display:block; animation:screenIn .28s ease;}
 
-/* ===== Content ===== */
-.content{flex:1; padding:20px 16px 100px; overflow-y:auto;}
-.view{display:none; animation:fade .35s var(--ease-out);}
-.view.active{display:block;}
-@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-
-.section-title{font-size:20px;line-height:28px;font-weight:600;text-align:center;color:var(--cobalt-900);margin-bottom:4px;}
-.section-desc{font-size:13px;line-height:18px;text-align:center;color:var(--text-tertiary);margin-bottom:20px;}
-
-/* ===== 3D Icon ===== */
-.icon-3d{
-  width:48px;height:48px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;
-  background:var(--gradient-icon);
-  box-shadow:var(--shadow-3d);
-  transition:transform .25s var(--ease-spring),box-shadow .25s ease;
-  flex-shrink:0;
-}
-.icon-3d.lg{width:64px;height:64px;border-radius:16px;}
-.icon-3d.xl{width:80px;height:80px;border-radius:20px;}
-.icon-3d.sm{width:36px;height:36px;border-radius:9px;}
-.icon-3d svg{color:#fff;width:50%;height:50%;}
-.icon-3d:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 24px rgba(0,71,171,.32),0 4px 8px rgba(0,71,171,.18),inset 0 2px 3px rgba(255,255,255,.4),inset 0 -2px 3px rgba(0,0,0,.18);}
-.icon-soft{background:var(--cloud-100);box-shadow:var(--shadow-2);}
-.icon-soft svg{color:var(--cobalt-700);}
+/* ===== Headers ===== */
+.screen-head{padding:8px 20px 14px;}
+.screen-head h1{margin:0; font-size:26px; font-weight:var(--head-weight); letter-spacing:-.02em; color:var(--text);}
+.screen-head p{margin:4px 0 0; font-size:13.5px; color:var(--subtext);}
 
 /* ===== Card ===== */
-.card{
-  background:var(--cloud-50);
-  border:1px solid var(--border-default);
-  border-radius:var(--radius-lg);
-  padding:20px; box-shadow:var(--shadow-2);
-  transition:all .3s ease; text-align:center;
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);}
+
+/* ===== Chips ===== */
+.chip{
+  display:inline-flex; align-items:center; gap:6px; flex-shrink:0;
+  padding:8px 14px; border-radius:var(--chip-radius);
+  border:1px solid var(--border); background:var(--surface); color:var(--text);
+  font-size:13.5px; font-weight:500; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all .15s ease;
 }
-.card+.card{margin-top:14px;}
-.card-feature{background:var(--gradient-signature);color:#fff;border:none;}
+.chip.ico{padding-left:11px;}
+.chip.active{border-color:var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600;}
+.chip-row{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 12px;}
 
-/* ===== Buttons ===== */
-.btn{font-family:inherit;cursor:pointer;border:none;border-radius:var(--radius-md);font-weight:500;font-size:15px;transition:all .2s ease;}
-.btn-primary{
-  background:var(--gradient-button);color:#fff;padding:12px 24px;
-  box-shadow:0 4px 12px rgba(0,71,171,.28),inset 0 1px 2px rgba(255,255,255,.2);
+/* ===== Exchange ===== */
+.ex-wrap{padding:4px 16px 24px;}
+.install-btn{
+  width:100%; height:48px; border:none; border-radius:var(--radius-sm); background:var(--accent); color:var(--accent-ink);
+  font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:14px;
+  display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 24px var(--accent-shadow);
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,71,171,.35),inset 0 1px 2px rgba(255,255,255,.25);}
-.btn-primary:active{transform:scale(.98);}
-.btn-secondary{background:var(--cloud-200);color:var(--cobalt-500);border:1.5px solid var(--cobalt-500);padding:11px 22px;}
-.btn-ghost{background:transparent;color:var(--cobalt-500);padding:10px 18px;}
-.btn-ghost:hover{background:var(--cobalt-50);}
-.btn-block{width:100%;}
-.btn-sm{padding:8px 14px;font-size:13px;border-radius:var(--radius-sm);}
-.btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
-
-/* ===== Inputs ===== */
-.field{text-align:left;margin-bottom:14px;}
-.field label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;}
-.input,textarea,select{
-  width:100%;font-family:inherit;background:var(--cloud-100);
-  border:1.5px solid var(--border-default);border-radius:var(--radius-md);
-  padding:12px 14px;font-size:15px;color:var(--text-primary);transition:all .2s ease;
+.ios-note{
+  display:none; font-size:12.5px; line-height:1.5; color:var(--accent); background:var(--accent-soft);
+  padding:11px 14px; border-radius:var(--radius-sm); margin-bottom:14px; text-align:center;
 }
-textarea{resize:vertical;min-height:80px;line-height:1.5;}
-.input:focus,textarea:focus,select:focus{outline:none;border-color:var(--cobalt-500);background:#fff;box-shadow:0 0 0 4px rgba(0,71,171,.12);}
+.money{padding:16px 18px;}
+.money-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+.money-label{font-size:13px; color:var(--subtext); font-weight:500;}
+.money-code{font-size:12px; font-weight:600; color:var(--subtext); background:var(--surface2); padding:3px 9px; border-radius:999px;}
+.money-row{display:flex; align-items:baseline; gap:8px;}
+.money-sym{font-size:26px; font-weight:600; color:var(--text);}
+.money-sym.accent{color:var(--accent);}
+.money-input,.money-out{
+  flex:1; min-width:0; border:none; outline:none; background:transparent; text-align:right;
+  font-family:inherit; font-variant-numeric:tabular-nums; font-size:34px; font-weight:700; color:var(--text); letter-spacing:-.02em;
+}
+.money-out{overflow:hidden; text-overflow:ellipsis;}
+.rate-divider{display:flex; align-items:center; gap:12px; padding:0 18px;}
+.rate-divider .line{flex:1; height:1px; background:var(--border);}
+.rate-pin{
+  display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+  border:1px solid var(--border); background:var(--surface); border-radius:999px;
+  padding:5px 12px; font-family:inherit; color:var(--text); font-size:13px; font-weight:600;
+}
+.rate-pin .msr{color:var(--accent);}
+.rate-pin input{width:54px; border:none; outline:none; background:transparent; font-family:inherit; font-size:13px; font-weight:700; color:var(--accent); text-align:right;}
+.quick-row{display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:2px;}
+.rate-status{display:flex; align-items:center; gap:8px; margin-top:14px; padding:0 4px;}
+.rate-status .msr{color:var(--subtext);}
+.rate-status .txt{font-size:12.5px; color:var(--subtext); flex:1;}
+.rate-refresh{display:inline-flex; align-items:center; gap:5px; border:none; background:transparent; color:var(--accent); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;}
+.ex-tip-card{margin-top:16px; padding:16px 18px;}
+.ex-tip-head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
+.ex-tip-head .msr{color:var(--accent);}
+.ex-tip-head span{font-size:14.5px; font-weight:700;}
+.ex-tip-row{display:flex; gap:10px; margin-top:11px;}
+.ex-tip-row:first-of-type{margin-top:0;}
+.ex-tip-dot{width:5px; height:5px; border-radius:999px; background:var(--accent); margin-top:7px; flex-shrink:0;}
+.ex-tip-row span{font-size:13.5px; color:var(--subtext); line-height:1.5;}
 
-/* ===== Badge ===== */
-.badge{display:inline-block;padding:4px 12px;border-radius:var(--radius-full);font-size:12px;font-weight:500;}
-.badge-primary{background:var(--cobalt-50);color:var(--cobalt-700);}
-.badge-neutral{background:var(--cloud-200);color:var(--text-secondary);}
-.badge-food{background:#FCEFE3;color:#B5701F;}
-.badge-spot{background:#E3F1EA;color:#1E6B43;}
+/* ===== Search ===== */
+.search-wrap{margin:0 16px;}
+.search-box{display:flex; align-items:center; gap:10px; padding:0 14px; height:46px; background:var(--surface2); border-radius:var(--radius-sm);}
+.search-box .msr{color:var(--subtext);}
+.search-box input{flex:1; border:none; outline:none; background:transparent; font-family:inherit; font-size:14.5px; color:var(--text);}
+.search-box .clr{border:none; background:transparent; cursor:pointer; padding:0; display:flex;}
 
-/* ===== 환율 ===== */
-.fx-card{background:var(--gradient-signature);color:#fff;border-radius:var(--radius-xl);padding:24px 20px;box-shadow:var(--shadow-3);text-align:center;}
-.fx-rate-line{font-size:14px;font-weight:500;color:rgba(255,255,255,.9);margin-bottom:4px;}
-.fx-rate-big{font-size:30px;font-weight:700;letter-spacing:-1px;}
-.fx-rate-big small{font-size:14px;font-weight:500;opacity:.85;}
-.fx-conv{margin-top:18px;}
-.fx-swap{display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0;}
-.fx-inp-wrap{flex:1;position:relative;}
-.fx-inp-wrap .cur{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;color:var(--text-tertiary);pointer-events:none;}
-.fx-inp{width:100%;background:rgba(255,255,255,.95);border:none;border-radius:var(--radius-md);padding:14px 46px 14px 14px;font-size:18px;font-weight:600;color:var(--cobalt-900);text-align:right;font-family:inherit;}
-.fx-inp:focus{outline:none;box-shadow:0 0 0 4px rgba(255,255,255,.4);}
-.swap-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.18);transition:transform .3s var(--ease-spring);flex-shrink:0;}
-.swap-btn:active{transform:rotate(180deg) scale(.92);}
-.swap-btn svg{width:18px;height:18px;color:var(--cobalt-700);}
-.fx-quick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
-.fx-quick button{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 12px;border-radius:var(--radius-full);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}
-.fx-quick button:active{background:rgba(255,255,255,.32);}
-.rate-edit{margin-top:14px;display:flex;gap:8px;align-items:center;justify-content:center;}
-.rate-edit input{width:90px;text-align:center;padding:8px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-weight:600;}
+/* ===== Place card ===== */
+.list{display:flex; flex-direction:column; gap:12px; padding:0 16px 24px;}
+.pcard{overflow:hidden;}
+.pcard-inner{display:flex;}
+.pcard-photo{width:104px; align-self:stretch; flex-shrink:0; object-fit:cover; background:var(--surface2); min-height:130px;}
+.ph{
+  position:relative; overflow:hidden; background:var(--surface2);
+  background-image:repeating-linear-gradient(135deg, rgba(0,0,0,.035) 0 8px, transparent 8px 16px);
+  display:flex; align-items:center; justify-content:center; color:var(--subtext);
+}
+.ph span{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.3px; opacity:.7;}
+.pcard-body{flex:1; min-width:0; padding:13px 14px;}
+.pcard-name{font-size:16px; font-weight:700; letter-spacing:-.01em;}
+.pcard-sub{display:flex; align-items:center; gap:6px; margin-top:3px; color:var(--subtext); font-size:12.5px;}
+.pcard-sub .msr{color:var(--accent);}
+.pcard-sub .area{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.pcard-meta{display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap;}
+.stars{display:inline-flex; align-items:center; gap:3px; color:var(--accent);}
+.stars b{font-weight:600; font-size:14px; color:var(--text);}
+.pcard-meta .pr{font-size:12.5px; color:var(--subtext); font-weight:600;}
+.pcard-meta .mins{display:inline-flex; align-items:center; gap:3px; font-size:12.5px; color:var(--subtext);}
+.pcard-review{margin:8px 0 0; font-size:13px; color:var(--subtext); line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+.pcard-foot{display:flex; justify-content:space-between; align-items:center; margin-top:11px; gap:8px;}
+.open{font-size:11.5px; color:var(--subtext); font-weight:600;}
+.open.now{color:var(--ok);}
+.btn-dir{display:inline-flex; align-items:center; gap:5px; border:none; background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:7px 13px; font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:none;}
+.row-tools{display:flex; align-items:center; gap:4px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); flex-wrap:wrap;}
+.tool{display:inline-flex; align-items:center; gap:5px; border:none; background:transparent; color:var(--subtext); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; padding:5px 8px; border-radius:8px; text-decoration:none;}
+.tool:hover{background:var(--surface2);}
+.tool.danger{color:#cf4d4d;}
+.tool .msr{font-size:16px;}
 
-/* ===== List items ===== */
-.item{background:var(--cloud-50);border:1px solid var(--border-default);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-2);transition:all .3s ease;text-align:center;}
-.item+.item{margin-top:14px;}
-.item:hover{border-color:var(--cobalt-100);box-shadow:var(--shadow-3);transform:translateY(-2px);}
-.item-photo{width:100%;height:160px;object-fit:cover;display:block;background:var(--cloud-200);}
-.item-body{padding:16px;}
-.item-head{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
-.item-name{font-size:17px;font-weight:600;color:var(--text-primary);}
-.stars{color:var(--warning);font-size:14px;letter-spacing:1px;margin-bottom:6px;}
-.stars .empty{color:var(--cloud-300);}
-.item-meta{font-size:13px;color:var(--text-secondary);margin:3px 0;display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;}
-.item-meta svg{width:14px;height:14px;color:var(--cobalt-500);flex-shrink:0;}
-.item-review{font-size:13px;line-height:1.6;color:var(--text-secondary);text-align:left;margin:10px 0 12px;background:var(--cloud-100);padding:10px 12px;border-radius:var(--radius-md);}
-.item-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
-.link-chip{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--radius-full);background:var(--cobalt-50);color:var(--cobalt-700);transition:all .2s;cursor:pointer;border:none;font-family:inherit;}
-.link-chip svg{width:14px;height:14px;}
-.link-chip:hover{background:var(--cobalt-100);}
-.link-chip.danger{background:#FBE9E9;color:var(--error);}
-.link-chip.call{background:#E3F1EA;color:#1E6B43;}
+/* ===== Goods grid ===== */
+.goods-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:8px 16px 24px;}
+.gcard{overflow:hidden; display:flex; flex-direction:column;}
+.gcard-photo{height:110px; object-fit:cover; background:var(--surface2); width:100%;}
+.gcard-body{padding:11px 12px 12px; display:flex; flex-direction:column; flex:1;}
+.gcard-name{font-size:14.5px; font-weight:700;}
+.gcard-price{font-size:13.5px; font-weight:700; color:var(--accent); margin-top:4px;}
+.gcard-price .krw{color:var(--subtext); font-weight:500; font-size:11.5px;}
+.gcard-note{margin:7px 0 10px; font-size:12px; color:var(--subtext); line-height:1.45; flex:1;}
+.gcard-where{display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--subtext); border-top:1px solid var(--border); padding-top:9px; text-decoration:none;}
+.gcard-where .msr{color:var(--accent);}
+.gcard-where .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.gcard-tools{display:flex; gap:2px; margin-top:8px;}
 
-/* ===== Empty state ===== */
-.empty{text-align:center;padding:48px 20px;}
-.empty .icon-3d{margin-bottom:16px;}
-.empty p{font-size:14px;color:var(--text-tertiary);line-height:1.6;}
+/* ===== Tips ===== */
+.tcard{padding:15px 16px;}
+.tcard-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px;}
+.tcat{display:inline-flex; align-items:center; gap:5px; background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:4px 10px; font-size:11.5px; font-weight:700;}
+.tcard-tools{display:flex; gap:2px;}
+.tcard-title{font-size:15.5px; font-weight:700; letter-spacing:-.01em;}
+.tcard-body{margin:6px 0 0; font-size:13.5px; color:var(--subtext); line-height:1.55; white-space:pre-wrap;}
 
-/* ===== Floating add button ===== */
+/* ===== Empty ===== */
+.empty{text-align:center; padding:48px 16px; color:var(--subtext);}
+.empty .msr{font-size:40px; opacity:.4;}
+.empty p{margin-top:10px; font-size:14px; line-height:1.6;}
+
+/* ===== FAB ===== */
 .fab{
-  position:fixed;bottom:88px;left:50%;transform:translateX(calc(-50% + 150px));
-  width:56px;height:56px;border-radius:18px;border:none;cursor:pointer;z-index:60;
-  background:var(--gradient-icon);box-shadow:var(--shadow-3d);
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .25s var(--ease-spring);
+  position:absolute; right:18px; bottom:calc(80px + env(safe-area-inset-bottom)); z-index:25;
+  height:52px; padding:0 18px; border-radius:16px; border:none; background:var(--accent); color:var(--accent-ink);
+  display:none; align-items:center; gap:8px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600;
+  box-shadow:0 8px 24px var(--accent-shadow);
 }
-@media(max-width:440px){.fab{transform:none;right:18px;left:auto;}}
-.fab:hover{transform:translateY(-3px) scale(1.04);}
-@media(max-width:440px){.fab:hover{transform:translateY(-3px) scale(1.04);}}
-.fab:active{transform:scale(.95);}
-.fab svg{width:26px;height:26px;color:#fff;}
 
 /* ===== Bottom nav ===== */
-.nav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:440px;z-index:70;
-  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);
-  border-top:1px solid var(--border-default);
-  display:flex;padding:8px 6px calc(8px + env(safe-area-inset-bottom));
-  box-shadow:0 -4px 24px rgba(0,71,171,.06);
+.bottomnav{
+  display:flex; flex-shrink:0; background:var(--surface); border-top:1px solid var(--border);
+  position:sticky; bottom:0; z-index:30; padding-bottom:env(safe-area-inset-bottom);
 }
-.nav button{
-  flex:1;background:none;border:none;cursor:pointer;font-family:inherit;
-  display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;
-  color:var(--text-tertiary);transition:color .2s;
+.bottomnav button{
+  flex:1; border:none; background:transparent; cursor:pointer; font-family:inherit;
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 7px; color:var(--subtext);
 }
-.nav button svg{width:22px;height:22px;}
-.nav button span{font-size:10.5px;font-weight:500;}
-.nav button.active{color:var(--cobalt-500);}
-.nav button.active svg{transform:translateY(-1px);}
+.bottomnav button .msr{font-size:24px;}
+.bottomnav button span{font-size:11px; font-weight:500;}
+.bottomnav button.active{color:var(--accent);}
+.bottomnav button.active span{font-weight:700;}
 
-/* ===== Modal ===== */
-.modal-overlay{position:fixed;inset:0;background:rgba(26,26,26,.45);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-end;justify-content:center;}
-.modal-overlay.open{display:flex;animation:fade .25s ease;}
-.modal{
-  width:100%;max-width:440px;background:var(--cloud-50);
-  border-top-left-radius:var(--radius-xl);border-top-right-radius:var(--radius-xl);
-  padding:8px 18px calc(24px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;
-  box-shadow:var(--shadow-4);animation:slideup .3s var(--ease-out);
-}
-@keyframes slideup{from{transform:translateY(100%);}to{transform:none;}}
-.modal-grip{width:40px;height:4px;border-radius:99px;background:var(--cloud-300);margin:8px auto 14px;}
-.modal h3{text-align:center;font-size:18px;font-weight:600;color:var(--cobalt-900);margin-bottom:18px;}
-.photo-preview{width:100%;height:160px;object-fit:cover;border-radius:var(--radius-md);margin-bottom:10px;display:none;background:var(--cloud-200);}
-.photo-drop{border:1.5px dashed var(--cobalt-100);border-radius:var(--radius-md);padding:18px;text-align:center;cursor:pointer;background:var(--cloud-100);transition:all .2s;color:var(--cobalt-500);font-size:13px;font-weight:500;}
-.photo-drop:hover{border-color:var(--cobalt-500);background:var(--cobalt-50);}
-.star-pick{display:flex;justify-content:center;gap:6px;margin-bottom:6px;}
-.star-pick span{font-size:30px;cursor:pointer;color:var(--cloud-300);transition:transform .15s var(--ease-spring),color .15s;}
-.star-pick span.on{color:var(--warning);}
-.star-pick span:active{transform:scale(1.25);}
+/* ===== Add sheet ===== */
+.sheet-overlay{position:fixed; inset:0; z-index:100; background:rgba(15,16,25,.4); display:none; align-items:flex-end; justify-content:center; animation:fadeIn .2s ease;}
+.sheet-overlay.open{display:flex;}
+.sheet{width:100%; max-width:440px; background:var(--surface); border-top-left-radius:22px; border-top-right-radius:22px; max-height:88vh; max-height:88dvh; overflow-y:auto; padding:8px 20px calc(24px + env(safe-area-inset-bottom)); animation:sheetUp .28s cubic-bezier(.2,.8,.2,1);}
+.sheet-grip{width:40px; height:4px; border-radius:999px; background:var(--border); margin:6px auto 16px;}
+.sheet-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+.sheet-head h2{margin:0; font-size:19px; font-weight:800;}
+.sheet-x{border:none; background:var(--surface2); border-radius:999px; width:32px; height:32px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--subtext);}
+.field{display:block; margin-bottom:14px;}
+.field>.lbl{display:block; font-size:12.5px; font-weight:600; color:var(--subtext); margin-bottom:6px;}
+.field>.lbl .req{color:var(--accent);}
+.inp{width:100%; box-sizing:border-box; height:44px; padding:0 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); font-family:inherit; font-size:14.5px; color:var(--text); outline:none;}
+textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
+.inp:focus{border-color:var(--accent); background:var(--surface);}
+.field-row{display:flex; gap:12px;}
+.field-row>div{flex:1;}
+.star-pick{display:flex; gap:4px;}
+.star-pick button{border:none; background:transparent; cursor:pointer; padding:2px; color:var(--border);}
+.star-pick button.on{color:var(--accent);}
+.star-pick .msr{font-size:28px;}
+.sheet-chips{display:flex; gap:8px; overflow-x:auto; flex-wrap:wrap; padding-bottom:2px;}
+.photo-drop{display:flex; align-items:center; justify-content:center; gap:8px; height:64px; border:1.5px dashed var(--border); border-radius:var(--radius-sm); color:var(--subtext); font-size:13.5px; font-weight:600; cursor:pointer;}
+.photo-prev{width:100%; height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:8px; display:none; background:var(--surface2);}
+.sheet-actions{display:flex; gap:10px; margin-top:8px;}
+.btn-cancel{flex:1; height:50px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
+.btn-save{flex:1.6; height:50px; border-radius:var(--radius-sm); border:none; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
 
-/* tip card */
-.tip{background:var(--cloud-50);border:1px solid var(--border-default);border-left:4px solid var(--cobalt-500);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-2);text-align:left;}
-.tip+.tip{margin-top:12px;}
-.tip-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
-.tip-title{font-size:15px;font-weight:600;color:var(--cobalt-900);}
-.tip-body{font-size:13.5px;line-height:1.65;color:var(--text-secondary);white-space:pre-wrap;}
-.tip-cat{font-size:11px;font-weight:600;color:var(--cobalt-500);background:var(--cobalt-50);padding:3px 9px;border-radius:99px;}
-.x-btn{background:none;border:none;cursor:pointer;color:var(--cloud-400);padding:4px;display:flex;}
-.x-btn svg{width:16px;height:16px;}
-.x-btn:hover{color:var(--error);}
-
-.toast{position:fixed;bottom:160px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--cobalt-900);color:#fff;padding:11px 20px;border-radius:var(--radius-full);font-size:13px;font-weight:500;z-index:200;opacity:0;transition:all .3s var(--ease-out);box-shadow:var(--shadow-3);white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-.filter-row{display:flex;gap:8px;justify-content:center;margin-bottom:16px;}
-.chip-filter{padding:7px 16px;border-radius:var(--radius-full);border:1.5px solid var(--border-default);background:var(--cloud-50);color:var(--text-secondary);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s;}
-.chip-filter.active{background:var(--gradient-button);color:#fff;border-color:transparent;box-shadow:0 4px 10px rgba(0,71,171,.22);}
-.note{font-size:11.5px;color:var(--text-tertiary);line-height:1.5;margin-top:10px;}
+/* ===== Toast ===== */
+.toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); white-space:nowrap; pointer-events:none;}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="app-header">
-    <h1><span class="header-logo">🪷</span>슬기로운 NCR</h1>
-    <div class="sub">델리 수도권(NCR) 생활·여행 도우미</div>
+  <header class="brandbar">
+    <div class="brand-logo"><span class="msr fill" style="font-size:19px">spa</span></div>
+    <div class="brand-name">슬기로운 NCR</div>
+    <div class="brand-loc"><span class="msr fill" style="font-size:16px">location_on</span>Delhi NCR</div>
   </header>
 
   <main class="content">
     <!-- ===== 환율 ===== -->
-    <section id="view-fx" class="view active">
-      <button id="installBtn" class="btn btn-primary btn-block" style="display:none;margin-bottom:14px">📲 홈 화면에 앱 설치</button>
-      <div id="iosInstall" class="note" style="display:none;text-align:center;background:var(--cobalt-50);color:var(--cobalt-700);padding:10px 14px;border-radius:var(--radius-md);margin-bottom:14px">🍎 아이폰: 사파리 하단 <b>공유</b> → <b>"홈 화면에 추가"</b>로 앱처럼 설치할 수 있어요.</div>
-      <div class="fx-card">
-        <div class="fx-rate-line" id="fxStatus">환율 불러오는 중…</div>
-        <div class="fx-rate-big">₹1 = <span id="rateDisplay">15.7</span><small> 원</small></div>
-        <div class="fx-conv">
-          <div class="fx-swap">
-            <div class="fx-inp-wrap">
-              <input type="number" inputmode="decimal" id="inrInput" class="fx-inp" placeholder="0" value="1000">
-              <span class="cur" id="topCur">INR ₹</span>
-            </div>
-            <button class="swap-btn" id="swapBtn" aria-label="통화 전환">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-3 3 3 3M4 13h12M17 14l3-3-3-3M20 11H8"/></svg>
-            </button>
-            <div class="fx-inp-wrap">
-              <input type="text" inputmode="decimal" id="krwInput" class="fx-inp" placeholder="0" readonly>
-              <span class="cur" id="botCur">KRW ₩</span>
-            </div>
-          </div>
-          <div class="fx-quick" id="fxQuick"></div>
-          <div class="rate-edit">
-            <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.85)">₹1 =</span>
-            <input type="number" inputmode="decimal" id="rateInput" value="15.7">
-            <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.85)">원</span>
-            <button class="btn btn-sm" style="background:rgba(255,255,255,.92);color:var(--cobalt-700)" id="saveRate">저장</button>
-          </div>
-          <button id="fxRefresh" style="margin-top:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;padding:9px 18px;border-radius:9999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🔄 실시간 환율 새로고침</button>
-        </div>
-      </div>
-      <p class="note" style="text-align:center">앱을 열면 실시간 환율을 자동으로 불러옵니다(매일 갱신). 오프라인이면 마지막 저장값을 사용해요. 필요하면 위에서 직접 수정해 저장할 수도 있습니다.</p>
+    <section id="view-exchange" class="view active">
+      <div class="ex-wrap">
+        <button id="installBtn" class="install-btn" style="display:none"><span class="msr b" style="font-size:20px">install_mobile</span>홈 화면에 앱 설치</button>
+        <div id="iosNote" class="ios-note">🍎 아이폰: 사파리 하단 <b>공유</b> → <b>"홈 화면에 추가"</b>로 앱처럼 설치할 수 있어요.</div>
 
-      <div class="card" style="margin-top:18px">
-        <div class="icon-3d" style="margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <div style="font-size:15px;font-weight:600;color:var(--cobalt-900);margin-bottom:8px">환전 꿀팁</div>
-        <p style="font-size:13px;line-height:1.7;color:var(--text-secondary);text-align:left">
-          • 공항 환전소는 환율이 가장 나빠요. 시내 ATM 인출이나 Wise·트래블카드를 활용하세요.<br>
-          • 큰 금액일수록 사설 환전소에서 흥정 여지가 있습니다.<br>
-          • 받은 지폐는 위조·훼손 여부를 꼭 확인하세요.
-        </p>
+        <div class="screen-head" style="padding-left:4px;padding-right:4px"><h1>환율 계산기</h1><p>인도 루피 ↔ 대한민국 원</p></div>
+
+        <div class="card">
+          <div class="money">
+            <div class="money-top"><span class="money-label">인도 루피</span><span class="money-code">INR</span></div>
+            <div class="money-row"><span class="money-sym">₹</span>
+              <input id="inrInput" class="money-input" inputmode="decimal" value="1000" placeholder="0"></div>
+          </div>
+          <div class="rate-divider">
+            <div class="line"></div>
+            <button class="rate-pin" id="ratePin">
+              <span class="msr b" style="font-size:15px">sync_alt</span>
+              <span id="ratePinText">₹1 = 15.70원</span>
+              <span class="msr" style="font-size:14px;color:var(--subtext)">edit</span>
+            </button>
+            <div class="line"></div>
+          </div>
+          <div class="money">
+            <div class="money-top"><span class="money-label">대한민국 원</span><span class="money-code">KRW</span></div>
+            <div class="money-row"><span class="money-sym accent">₩</span>
+              <span id="krwOut" class="money-out">0</span></div>
+          </div>
+        </div>
+
+        <div class="quick-row" id="quickRow"></div>
+
+        <div class="rate-status">
+          <span class="msr" style="font-size:15px">schedule</span>
+          <span class="txt" id="fxStatus">환율 불러오는 중…</span>
+          <button class="rate-refresh" id="fxRefresh"><span class="msr b" style="font-size:16px">refresh</span>새로고침</button>
+        </div>
+
+        <div class="card ex-tip-card">
+          <div class="ex-tip-head"><span class="msr fill" style="font-size:18px">lightbulb</span><span>환전 꿀팁</span></div>
+          <div class="ex-tip-row"><span class="ex-tip-dot"></span><span>공항 환전소는 환율이 가장 나빠요. 시내 ATM 인출이나 Wise·트래블카드를 활용하세요.</span></div>
+          <div class="ex-tip-row"><span class="ex-tip-dot"></span><span>큰 금액일수록 사설 환전소에서 흥정 여지가 있어요.</span></div>
+          <div class="ex-tip-row"><span class="ex-tip-dot"></span><span>받은 지폐는 위조·훼손 여부를 꼭 확인하세요.</span></div>
+        </div>
       </div>
     </section>
 
-    <!-- ===== 맛집 & 명소 ===== -->
-    <section id="view-place" class="view">
-      <h2 class="section-title">맛집 &amp; 가볼 곳</h2>
-      <p class="section-desc">사진·리뷰·연락처와 지도 길찾기를 한 곳에</p>
-      <div class="filter-row">
-        <button class="chip-filter active" data-filter="all">전체</button>
-        <button class="chip-filter" data-filter="food">맛집</button>
-        <button class="chip-filter" data-filter="spot">명소</button>
+    <!-- ===== 둘러보기 ===== -->
+    <section id="view-places" class="view">
+      <div class="screen-head"><h1>둘러보기</h1><p id="placesSub">델리 NCR 추천 · 사진·리뷰·길찾기</p></div>
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="msr" style="font-size:20px">search</span>
+          <input id="placeSearch" placeholder="장소·지역·메뉴 검색">
+          <button class="clr" id="placeSearchClr" style="display:none"><span class="msr" style="font-size:18px;color:var(--subtext)">close</span></button>
+        </div>
       </div>
-      <div id="placeList"></div>
+      <div class="chip-row" id="placeCats"></div>
+      <div class="list" id="placeList"></div>
     </section>
 
     <!-- ===== 특산물 ===== -->
-    <section id="view-product" class="view">
-      <h2 class="section-title">추천 특산물</h2>
-      <p class="section-desc">사고 싶은 인도 특산물과 구매처 메모</p>
-      <div id="productList"></div>
+    <section id="view-goods" class="view">
+      <div class="screen-head"><h1>추천 특산물</h1><p>사고 싶은 인도 특산물과 구매처 메모</p></div>
+      <div class="goods-grid" id="goodsList"></div>
     </section>
 
     <!-- ===== 팁 ===== -->
-    <section id="view-tip" class="view">
-      <h2 class="section-title">나의 팁 노트</h2>
-      <p class="section-desc">현지에서 얻은 정보를 자유롭게 기록</p>
-      <div id="tipList"></div>
+    <section id="view-tips" class="view">
+      <div class="screen-head"><h1>나의 팁 노트</h1><p>현지에서 얻은 정보를 자유롭게 기록</p></div>
+      <div class="chip-row" id="tipCats"></div>
+      <div class="list" id="tipList"></div>
     </section>
   </main>
 
-  <!-- FAB -->
-  <button class="fab" id="fab" style="display:none" aria-label="추가">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-  </button>
+  <button class="fab" id="fab"><span class="msr b" style="font-size:22px">add</span><span id="fabLabel">장소</span></button>
 
-  <!-- Bottom nav -->
-  <nav class="nav">
-    <button class="active" data-tab="fx">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M8 6h6a3 3 0 0 1 0 6H8m0 4h7"/></svg>
-      <span>환율</span>
-    </button>
-    <button data-tab="place">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span>맛집·명소</span>
-    </button>
-    <button data-tab="product">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
-      <span>특산물</span>
-    </button>
-    <button data-tab="tip">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1v.2h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z"/></svg>
-      <span>팁</span>
-    </button>
-  </nav>
+  <nav class="bottomnav" id="nav"></nav>
 </div>
 
-<!-- ===== Modals ===== -->
-<div class="modal-overlay" id="placeModal">
-  <div class="modal">
-    <div class="modal-grip"></div>
-    <h3 id="placeModalTitle">새 장소 추가</h3>
-    <div class="field">
-      <label>구분</label>
-      <select id="p_cat">
-        <option value="food">🍛 맛집</option>
-        <option value="spot">📍 가볼만한 곳</option>
-      </select>
-    </div>
-    <div class="field"><label>이름 *</label><input class="input" id="p_name" placeholder="예: Bukhara 레스토랑"></div>
-    <div class="field"><label>별점</label>
-      <div class="star-pick" id="p_stars">
-        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
-      </div>
-    </div>
-    <div class="field"><label>주소 / 위치</label><input class="input" id="p_addr" placeholder="예: Connaught Place, New Delhi"></div>
-    <div class="field"><label>연락처</label><input class="input" id="p_contact" inputmode="tel" placeholder="예: +91 11 2345 6789"></div>
-    <div class="field"><label>예상 소요시간 메모</label><input class="input" id="p_time" placeholder="예: 숙소에서 차로 약 25분"></div>
-    <div class="field"><label>리뷰 / 한줄평</label><textarea id="p_review" placeholder="음식·분위기·추천 메뉴 등을 적어보세요"></textarea></div>
-    <div class="field"><label>사진</label>
-      <img class="photo-preview" id="p_preview">
-      <div class="photo-drop" id="p_drop">📷 사진 선택 / 촬영하기</div>
-      <input type="file" id="p_file" accept="image/*" hidden>
-    </div>
-    <div class="btn-row" style="margin-top:6px">
-      <button class="btn btn-ghost" onclick="closeModal('placeModal')">취소</button>
-      <button class="btn btn-primary" id="p_save">저장하기</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="productModal">
-  <div class="modal">
-    <div class="modal-grip"></div>
-    <h3 id="productModalTitle">새 특산물 추가</h3>
-    <div class="field"><label>특산물 이름 *</label><input class="input" id="pr_name" placeholder="예: 다즐링 홍차, 파슈미나 숄"></div>
-    <div class="field"><label>설명 / 추천 이유</label><textarea id="pr_desc" placeholder="어떤 점이 좋은지, 선물용인지 등"></textarea></div>
-    <div class="field"><label>구매처</label><input class="input" id="pr_shop" placeholder="예: Dilli Haat, Khan Market"></div>
-    <div class="field"><label>대략 가격 (₹)</label><input class="input" id="pr_price" inputmode="decimal" placeholder="예: 500"></div>
-    <div class="field"><label>사진</label>
-      <img class="photo-preview" id="pr_preview">
-      <div class="photo-drop" id="pr_drop">📷 사진 선택 / 촬영하기</div>
-      <input type="file" id="pr_file" accept="image/*" hidden>
-    </div>
-    <div class="btn-row" style="margin-top:6px">
-      <button class="btn btn-ghost" onclick="closeModal('productModal')">취소</button>
-      <button class="btn btn-primary" id="pr_save">저장하기</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="tipModal">
-  <div class="modal">
-    <div class="modal-grip"></div>
-    <h3 id="tipModalTitle">새 팁 추가</h3>
-    <div class="field"><label>분류</label>
-      <select id="t_cat">
-        <option>교통</option><option>음식</option><option>쇼핑</option><option>안전</option>
-        <option>문화·매너</option><option>건강</option><option>통신·결제</option><option>기타</option>
-      </select>
-    </div>
-    <div class="field"><label>제목 *</label><input class="input" id="t_title" placeholder="예: 오토릭샤 흥정 요령"></div>
-    <div class="field"><label>내용</label><textarea id="t_body" placeholder="자유롭게 기록하세요" style="min-height:120px"></textarea></div>
-    <div class="btn-row" style="margin-top:6px">
-      <button class="btn btn-ghost" onclick="closeModal('tipModal')">취소</button>
-      <button class="btn btn-primary" id="t_save">저장하기</button>
+<!-- ===== Add sheet ===== -->
+<div class="sheet-overlay" id="sheetOverlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head"><h2 id="sheetTitle">추가</h2>
+      <button class="sheet-x" id="sheetClose"><span class="msr" style="font-size:18px">close</span></button></div>
+    <div id="sheetBody"></div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" id="sheetCancel">취소</button>
+      <button class="btn-save" id="sheetSave">저장하기</button>
     </div>
   </div>
 </div>
@@ -453,7 +369,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============ Storage helpers (IndexedDB) ============ */
+/* ============ IndexedDB ============ */
 const KEYS={places:'ncr:places',products:'ncr:products',tips:'ncr:tips',rate:'ncr:rate'};
 const idb={
   _db:null,
@@ -469,19 +385,18 @@ const idb={
   async get(k){const db=await this.open();return new Promise((res,rej)=>{const q=db.transaction('kv','readonly').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});},
   async set(k,v){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}
 };
-async function load(key,fallback){
-  try{const v=await idb.get(key);return(v===undefined||v===null)?fallback:v;}
-  catch(e){return fallback;}
-}
-async function save(key,val){
-  try{await idb.set(key,val);}
-  catch(e){toast('저장 공간 오류가 발생했어요');}
-}
+async function load(key,fallback){try{const v=await idb.get(key);return(v===undefined||v===null)?fallback:v;}catch(e){return fallback;}}
+async function save(key,val){try{await idb.set(key,val);}catch(e){toast('저장 공간 오류가 발생했어요');}}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
-/* ============ Toast ============ */
+/* ============ Util ============ */
+function esc(s){return(s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const fmt=(n,d=0)=>(Number(n)||0).toLocaleString('ko-KR',{maximumFractionDigits:d,minimumFractionDigits:d});
 let toastT;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1900);}
+function mapsSearch(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q);}
+function icon(name,cls,size){return `<span class="msr${cls?' '+cls:''}"${size?` style="font-size:${size}px"`:''}>${name}</span>`;}
 
 /* ============ Image resize ============ */
 function resizeImage(file,max=900,quality=.72){
@@ -490,9 +405,8 @@ function resizeImage(file,max=900,quality=.72){
     reader.onload=e=>{
       const img=new Image();
       img.onload=()=>{
-        let{width:w,height:h}=img;
-        if(w>h&&w>max){h=h*max/w;w=max;}
-        else if(h>=w&&h>max){w=w*max/h;h=max;}
+        let w=img.width,h=img.height;
+        if(w>h&&w>max){h=h*max/w;w=max;}else if(h>=w&&h>max){w=w*max/h;h=max;}
         const c=document.createElement('canvas');c.width=w;c.height=h;
         c.getContext('2d').drawImage(img,0,0,w,h);
         res(c.toDataURL('image/jpeg',quality));
@@ -503,73 +417,86 @@ function resizeImage(file,max=900,quality=.72){
   });
 }
 
+/* ============ Config ============ */
+const PLACE_CATS=[
+  {id:'all',label:'전체',icon:'apps'},
+  {id:'food',label:'맛집',icon:'restaurant'},
+  {id:'cafe',label:'카페',icon:'local_cafe'},
+  {id:'bar',label:'술집',icon:'local_bar'},
+  {id:'sight',label:'명소',icon:'photo_camera'},
+  {id:'shop',label:'쇼핑',icon:'shopping_bag'},
+  {id:'barber',label:'이발소',icon:'content_cut'},
+  {id:'care',label:'병원·약국',icon:'local_hospital'},
+];
+const CAT_MAP=Object.fromEntries(PLACE_CATS.map(c=>[c.id,c]));
+const TIP_CATS=['교통','음식','쇼핑','안전','문화·매너','건강','통신·결제','기타'];
+const TIP_ICON={'교통':'directions_bus','음식':'restaurant','쇼핑':'shopping_bag','안전':'shield','문화·매너':'handshake','건강':'health_and_safety','통신·결제':'sim_card','기타':'more_horiz'};
+const NAV=[
+  {id:'exchange',label:'환율',icon:'currency_exchange'},
+  {id:'places',label:'둘러보기',icon:'explore'},
+  {id:'goods',label:'특산물',icon:'redeem'},
+  {id:'tips',label:'팁',icon:'sticky_note_2'},
+];
+
 /* ============ State ============ */
 let state={places:[],products:[],tips:[],rate:15.7};
-let editId={place:null,product:null,tip:null};
-let tmpPhoto={place:null,product:null};
-let pStarVal=0;
-let curTab='fx';
+let curTab='exchange';
 let placeFilter='all';
+let placeQuery='';
+let tipFilter='전체';
 
 /* ============ Navigation ============ */
-const tabs=document.querySelectorAll('.nav button');
-tabs.forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=NAV.map(n=>`<button data-tab="${n.id}">${icon(n.icon,'',24)}<span>${n.label}</span></button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+}
 function switchTab(tab){
   curTab=tab;
-  tabs.forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('#nav button').forEach(b=>{
+    const a=b.dataset.tab===tab;b.classList.toggle('active',a);
+    b.querySelector('.msr').className='msr'+(a?' fb':'');
+  });
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+tab).classList.add('active');
   const fab=document.getElementById('fab');
-  fab.style.display=(tab==='fx')?'none':'flex';
+  fab.style.display=(tab==='exchange')?'none':'flex';
+  document.getElementById('fabLabel').textContent=tab==='goods'?'특산물':tab==='tips'?'팁':'장소';
+  document.querySelector('.content').scrollTop=0;
 }
-document.getElementById('fab').addEventListener('click',()=>{
-  if(curTab==='place')openPlaceModal();
-  else if(curTab==='product')openProductModal();
-  else if(curTab==='tip')openTipModal();
-});
 
-/* ============ Modal helpers ============ */
-function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
-function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
-
-/* ============ 환율 ============ */
+/* ============ Exchange ============ */
 const inrInput=document.getElementById('inrInput');
-const krwInput=document.getElementById('krwInput');
-const rateInput=document.getElementById('rateInput');
-let inrToKrw=true; // true: 위=INR, 아래=KRW
+const krwOut=document.getElementById('krwOut');
+const ratePin=document.getElementById('ratePin');
 function renderRate(){
-  document.getElementById('rateDisplay').textContent=state.rate;
-  rateInput.value=state.rate;
-  document.getElementById('topCur').textContent=inrToKrw?'INR ₹':'KRW ₩';
-  document.getElementById('botCur').textContent=inrToKrw?'KRW ₩':'INR ₹';
-  convert();
-  renderQuick();
+  if(!ratePin.dataset.editing) document.getElementById('ratePinText').textContent='₹1 = '+fmt(state.rate,2)+'원';
+  convert();renderQuick();
 }
-function convert(){
-  const v=parseFloat(inrInput.value)||0;
-  const out=inrToKrw?(v*state.rate):(v/state.rate);
-  krwInput.value=out?out.toLocaleString('ko-KR',{maximumFractionDigits:inrToKrw?0:2}):'';
-}
-inrInput.addEventListener('input',convert);
-document.getElementById('swapBtn').addEventListener('click',()=>{
-  inrToKrw=!inrToKrw;
-  // 변환된 값을 입력칸으로 이동
-  const cur=parseFloat(krwInput.value.replace(/,/g,''))||0;
-  inrInput.value=cur||'';
-  renderRate();
-});
-document.getElementById('saveRate').addEventListener('click',async()=>{
-  const r=parseFloat(rateInput.value);
-  if(!r||r<=0){toast('올바른 환율을 입력하세요');return;}
-  state.rate=r;await save(KEYS.rate,r);renderRate();toast('환율이 저장되었어요');
-});
+function convert(){const v=parseFloat(inrInput.value)||0;krwOut.textContent=fmt(v*state.rate,0);}
+inrInput.addEventListener('input',()=>{inrInput.value=inrInput.value.replace(/[^0-9.]/g,'');convert();renderQuick();});
 function renderQuick(){
-  const box=document.getElementById('fxQuick');
-  const amts=inrToKrw?[100,500,1000,5000]:[10000,50000,100000];
-  box.innerHTML=amts.map(a=>`<button data-a="${a}">${inrToKrw?'₹':'₩'}${a.toLocaleString()}</button>`).join('');
-  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{inrInput.value=b.dataset.a;convert();}));
+  const box=document.getElementById('quickRow');
+  const amts=[100,500,1000,5000];const cur=parseFloat(inrInput.value)||0;
+  box.innerHTML=amts.map(a=>`<button class="chip${cur===a?' active':''}" data-a="${a}">₹${fmt(a)}</button>`).join('');
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{inrInput.value=b.dataset.a;convert();renderQuick();}));
 }
+ratePin.addEventListener('click',()=>{
+  if(ratePin.dataset.editing)return;
+  ratePin.dataset.editing='1';
+  ratePin.innerHTML='<span style="font-size:13px;color:var(--subtext)">₹1 =</span><input id="ratePinInput" inputmode="decimal"><span style="font-size:13px">원</span>';
+  const inp=document.getElementById('ratePinInput');inp.value=state.rate;inp.focus();inp.select();
+  inp.addEventListener('click',e=>e.stopPropagation());
+  const commit=async()=>{
+    const v=parseFloat(inp.value);
+    if(v&&v>0){state.rate=v;await save(KEYS.rate,v);toast('환율이 저장되었어요');}
+    delete ratePin.dataset.editing;
+    ratePin.innerHTML='<span class="msr b" style="font-size:15px">sync_alt</span><span id="ratePinText"></span><span class="msr" style="font-size:14px;color:var(--subtext)">edit</span>';
+    renderRate();
+  };
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=state.rate;inp.blur();}});
+});
 
 /* ============ 실시간 환율 ============ */
 const FX_API='https://open.er-api.com/v6/latest/INR';
@@ -585,8 +512,8 @@ async function fetchLiveRate(manual){
     state.rate=Math.round(rate*100)/100;
     await save(KEYS.rate,state.rate);
     const now=Date.now();await save('ncr:rateUpdated',now);
-    renderRate();
-    status.textContent='실시간 환율 · '+fmtUpdated(now)+' 기준';
+    renderRate();renderGoods();
+    status.textContent='실시간 환율 · '+fmtUpdated(now)+' 기준 · 오프라인이면 마지막 값 사용';
     if(manual)toast('실시간 환율을 불러왔어요');
     return true;
   }
@@ -597,221 +524,276 @@ async function fetchLiveRate(manual){
 }
 document.getElementById('fxRefresh').addEventListener('click',()=>fetchLiveRate(true));
 
-/* ============ 앱 설치 (PWA) ============ */
+/* ============ Places ============ */
+function buildPlaceCats(){
+  const box=document.getElementById('placeCats');
+  box.innerHTML=PLACE_CATS.map(c=>`<button class="chip ico${placeFilter===c.id?' active':''}" data-cat="${c.id}">${icon(c.icon,'b',17)}${esc(c.label)}</button>`).join('');
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{placeFilter=b.dataset.cat;buildPlaceCats();renderPlaces();}));
+}
+const placeSearch=document.getElementById('placeSearch');
+placeSearch.addEventListener('input',()=>{placeQuery=placeSearch.value;document.getElementById('placeSearchClr').style.display=placeQuery?'flex':'none';renderPlaces();});
+document.getElementById('placeSearchClr').addEventListener('click',()=>{placeSearch.value='';placeQuery='';document.getElementById('placeSearchClr').style.display='none';renderPlaces();});
+function placeCardHTML(p){
+  const cat=CAT_MAP[p.cat]||CAT_MAP.food;
+  const q=(p.name+' '+(p.addr||'')).trim();
+  const photo=p.photo?`<img class="pcard-photo" src="${esc(p.photo)}" alt="">`:`<div class="ph pcard-photo"><span>사진</span></div>`;
+  const rating=(p.stars&&Number(p.stars)>0)?`<span class="stars">${icon('star','fill',14)}<b>${Number(p.stars).toFixed(1)}</b></span>`:'';
+  const price=p.price?`<span class="pr">${esc(p.price)}</span>`:'';
+  const mins=p.time?`<span class="mins">${icon('directions_car','',14)}${esc(p.time)}</span>`:'';
+  const meta=(rating||price||mins)?`<div class="pcard-meta">${rating}${price}${mins}</div>`:'';
+  const review=p.review?`<p class="pcard-review">${esc(p.review)}</p>`:'';
+  const open=p.open?`<span class="open${String(p.open).includes('영업 중')?' now':''}">${esc(p.open)}</span>`:'<span></span>';
+  const tel=p.contact?`<a class="tool" href="tel:${esc(String(p.contact).replace(/[^+\d]/g,''))}">${icon('call','',16)}전화</a>`:'';
+  return `<div class="card pcard"><div class="pcard-inner">
+    ${photo}
+    <div class="pcard-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="min-width:0">
+          <div class="pcard-name">${esc(p.name)}</div>
+          <div class="pcard-sub">${icon(cat.icon,'b',14)}<span>${esc(cat.label)}</span><span style="opacity:.5">·</span><span class="area">${esc(p.addr||'위치 미정')}</span></div>
+        </div>
+      </div>
+      ${meta}${review}
+      <div class="pcard-foot">${open}<a class="btn-dir" href="${mapsDir(q)}" target="_blank" rel="noopener">${icon('near_me','fb',15)}길찾기</a></div>
+      <div class="row-tools">
+        <a class="tool" href="${mapsSearch(q)}" target="_blank" rel="noopener">${icon('map','',16)}지도</a>
+        ${tel}
+        <button class="tool" data-edit-place="${p.id}">${icon('edit','',16)}수정</button>
+        <button class="tool danger" data-del-place="${p.id}">${icon('delete','',16)}삭제</button>
+      </div>
+    </div>
+  </div></div>`;
+}
+function renderPlaces(){
+  const sub=document.getElementById('placesSub');
+  sub.textContent=`델리 NCR 추천 ${state.places.length}곳 · 사진·리뷰·길찾기`;
+  const list=document.getElementById('placeList');
+  const ql=placeQuery.trim().toLowerCase();
+  let arr=state.places.filter(p=>
+    (placeFilter==='all'||p.cat===placeFilter)&&
+    (!ql||((p.name||'')+(p.addr||'')+(p.review||'')).toLowerCase().includes(ql))
+  );
+  if(!arr.length){
+    list.innerHTML=`<div class="empty">${icon('travel_explore','',40)}<p>${placeQuery||placeFilter!=='all'?'해당하는 장소가 아직 없어요':'아직 등록된 곳이 없어요.<br>오른쪽 아래 + 버튼으로 추가해 보세요.'}</p></div>`;
+    return;
+  }
+  list.innerHTML=arr.map(placeCardHTML).join('');
+  list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',()=>openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace))));
+  list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',()=>delPlace(b.dataset.delPlace)));
+}
+function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;state.places=state.places.filter(p=>p.id!==id);save(KEYS.places,state.places);renderPlaces();toast('삭제되었어요');}
+
+/* ============ Goods ============ */
+function goodsCardHTML(g){
+  const photo=g.photo?`<img class="gcard-photo" src="${esc(g.photo)}" alt="">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
+  const priceNum=parseFloat(g.price);
+  const krw=(priceNum>0)?` <span class="krw">(≈ ${fmt(Math.round(priceNum*state.rate))}원)</span>`:'';
+  const price=g.price?`<div class="gcard-price">약 ₹${esc(g.price)}${krw}</div>`:'';
+  const note=g.desc?`<p class="gcard-note">${esc(g.desc)}</p>`:'<p class="gcard-note"></p>';
+  const where=g.shop?`<a class="gcard-where" href="${mapsSearch(g.shop+' Delhi')}" target="_blank" rel="noopener">${icon('storefront','b',14)}<span class="nm">${esc(g.shop)}</span></a>`:'';
+  return `<div class="card gcard">${photo}<div class="gcard-body">
+    <div class="gcard-name">${esc(g.name)}</div>${price}${note}${where}
+    <div class="gcard-tools">
+      <button class="tool" data-edit-good="${g.id}">${icon('edit','',16)}수정</button>
+      <button class="tool danger" data-del-good="${g.id}">${icon('delete','',16)}삭제</button>
+    </div>
+  </div></div>`;
+}
+function renderGoods(){
+  const list=document.getElementById('goodsList');
+  if(!state.products.length){
+    list.innerHTML=`<div class="empty" style="grid-column:1/-1">${icon('redeem','',40)}<p>사고 싶은 인도 특산물을<br>+ 버튼으로 기록해 보세요.</p></div>`;
+    return;
+  }
+  list.innerHTML=state.products.map(goodsCardHTML).join('');
+  list.querySelectorAll('[data-edit-good]').forEach(b=>b.addEventListener('click',()=>openSheet('goods',state.products.find(x=>x.id===b.dataset.editGood))));
+  list.querySelectorAll('[data-del-good]').forEach(b=>b.addEventListener('click',()=>delGood(b.dataset.delGood)));
+}
+function delGood(id){if(!confirm('이 특산물을 삭제할까요?'))return;state.products=state.products.filter(p=>p.id!==id);save(KEYS.products,state.products);renderGoods();toast('삭제되었어요');}
+
+/* ============ Tips ============ */
+function buildTipCats(){
+  const box=document.getElementById('tipCats');
+  const cats=['전체',...TIP_CATS];
+  box.innerHTML=cats.map(c=>`<button class="chip${tipFilter===c?' active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{tipFilter=b.dataset.cat;buildTipCats();renderTips();}));
+}
+function tipCardHTML(t){
+  return `<div class="card tcard">
+    <div class="tcard-head">
+      <span class="tcat">${icon(TIP_ICON[t.cat]||'label','b',14)}${esc(t.cat)}</span>
+      <span class="tcard-tools">
+        <button class="tool" data-edit-tip="${t.id}">${icon('edit','',16)}</button>
+        <button class="tool danger" data-del-tip="${t.id}">${icon('delete','',16)}</button>
+      </span>
+    </div>
+    <div class="tcard-title">${esc(t.title)}</div>
+    ${t.body?`<p class="tcard-body">${esc(t.body)}</p>`:''}
+  </div>`;
+}
+function renderTips(){
+  const list=document.getElementById('tipList');
+  let arr=state.tips.filter(t=>tipFilter==='전체'||t.cat===tipFilter);
+  if(!arr.length){
+    list.innerHTML=`<div class="empty">${icon('sticky_note_2','',40)}<p>현지 생활 꿀팁을<br>+ 버튼으로 모아보세요.</p></div>`;
+    return;
+  }
+  list.innerHTML=arr.map(tipCardHTML).join('');
+  list.querySelectorAll('[data-edit-tip]').forEach(b=>b.addEventListener('click',()=>openSheet('tips',state.tips.find(x=>x.id===b.dataset.editTip))));
+  list.querySelectorAll('[data-del-tip]').forEach(b=>b.addEventListener('click',()=>delTip(b.dataset.delTip)));
+}
+function delTip(id){if(!confirm('이 팁을 삭제할까요?'))return;state.tips=state.tips.filter(t=>t.id!==id);save(KEYS.tips,state.tips);renderTips();toast('삭제되었어요');}
+
+/* ============ Add / Edit sheet ============ */
+const sheetOverlay=document.getElementById('sheetOverlay');
+let sheetTab=null,sheetEditId=null,sheetCat=null,sheetStars=0,sheetPhoto=null;
+document.getElementById('fab').addEventListener('click',()=>openSheet(curTab==='goods'?'goods':curTab==='tips'?'tips':'places'));
+document.getElementById('sheetClose').addEventListener('click',closeSheet);
+document.getElementById('sheetCancel').addEventListener('click',closeSheet);
+sheetOverlay.addEventListener('click',e=>{if(e.target===sheetOverlay)closeSheet();});
+function closeSheet(){sheetOverlay.classList.remove('open');document.body.style.overflow='';}
+function chipsHTML(cats,active,withIcon){
+  return cats.map(c=>{
+    const id=withIcon?c.id:c;const label=withIcon?c.label:c;
+    return `<button type="button" class="chip${withIcon?' ico':''}${active===id?' active':''}" data-chip="${esc(id)}">${withIcon?icon(c.icon,'b',17):''}${esc(label)}</button>`;
+  }).join('');
+}
+function openSheet(tab,item){
+  sheetTab=tab;sheetEditId=item?item.id:null;sheetPhoto=item?(item.photo||null):null;
+  const titles={places:item?'장소 수정':'새 장소 추가',goods:item?'특산물 수정':'새 특산물 추가',tips:item?'팁 수정':'새 팁 추가'};
+  document.getElementById('sheetTitle').textContent=titles[tab];
+  const body=document.getElementById('sheetBody');
+  if(tab==='places'){
+    sheetCat=item?item.cat:'food';sheetStars=item?(Math.round(Number(item.stars))||0):0;
+    body.innerHTML=`
+      <label class="field"><span class="lbl">구분</span><div class="sheet-chips" id="catChips">${chipsHTML(PLACE_CATS.filter(c=>c.id!=='all'),sheetCat,true)}</div></label>
+      <label class="field"><span class="lbl">이름<span class="req"> *</span></span><input class="inp" id="f_name" placeholder="예: Bukhara" value="${esc(item?item.name:'')}"></label>
+      <label class="field"><span class="lbl">별점</span><div class="star-pick" id="starPick">${[1,2,3,4,5].map(n=>`<button type="button" data-star="${n}" class="${n<=sheetStars?'on':''}">${icon('star','fill',28)}</button>`).join('')}</div></label>
+      <label class="field"><span class="lbl">주소 / 위치</span><input class="inp" id="f_addr" placeholder="지역·랜드마크" value="${esc(item?item.addr:'')}"></label>
+      <div class="field-row">
+        <div><label class="field"><span class="lbl">예상 가격대</span><input class="inp" id="f_price" placeholder="₹₹" value="${esc(item?item.price:'')}"></label></div>
+        <div><label class="field"><span class="lbl">소요시간</span><input class="inp" id="f_time" placeholder="차로 20분" value="${esc(item?item.time:'')}"></label></div>
+      </div>
+      <label class="field"><span class="lbl">연락처</span><input class="inp" id="f_contact" inputmode="tel" placeholder="+91 11 2345 6789" value="${esc(item?item.contact:'')}"></label>
+      <label class="field"><span class="lbl">영업시간</span><input class="inp" id="f_open" placeholder="예: 영업 중 · ~23:00" value="${esc(item?item.open:'')}"></label>
+      <label class="field"><span class="lbl">리뷰 / 한줄평</span><textarea class="inp" id="f_review" placeholder="음식·분위기·추천 메뉴 등">${esc(item?item.review:'')}</textarea></label>
+      ${photoFieldHTML()}`;
+    bindCatChips();bindStarPick();bindPhoto();
+  }else if(tab==='goods'){
+    body.innerHTML=`
+      <label class="field"><span class="lbl">특산물 이름<span class="req"> *</span></span><input class="inp" id="f_name" placeholder="예: 다즐링 홍차" value="${esc(item?item.name:'')}"></label>
+      <label class="field"><span class="lbl">설명 / 추천 이유</span><textarea class="inp" id="f_desc" placeholder="어떤 점이 좋은지, 선물용인지 등">${esc(item?item.desc:'')}</textarea></label>
+      <div class="field-row">
+        <div style="flex:1.6"><label class="field"><span class="lbl">구매처</span><input class="inp" id="f_shop" placeholder="예: Dilli Haat" value="${esc(item?item.shop:'')}"></label></div>
+        <div style="flex:1"><label class="field"><span class="lbl">가격 (₹)</span><input class="inp" id="f_price" inputmode="numeric" placeholder="500" value="${esc(item?item.price:'')}"></label></div>
+      </div>
+      ${photoFieldHTML()}`;
+    bindPhoto();
+  }else{
+    sheetCat=item?item.cat:'교통';
+    body.innerHTML=`
+      <label class="field"><span class="lbl">분류</span><div class="sheet-chips" id="catChips">${chipsHTML(TIP_CATS,sheetCat,false)}</div></label>
+      <label class="field"><span class="lbl">제목<span class="req"> *</span></span><input class="inp" id="f_title" placeholder="핵심 한 줄" value="${esc(item?item.title:'')}"></label>
+      <label class="field"><span class="lbl">내용</span><textarea class="inp" id="f_body" style="height:110px" placeholder="자유롭게 기록하세요">${esc(item?item.body:'')}</textarea></label>`;
+    bindCatChips();
+  }
+  sheetOverlay.classList.add('open');document.body.style.overflow='hidden';
+  document.querySelector('.sheet').scrollTop=0;
+}
+function photoFieldHTML(){
+  return `<label class="field"><span class="lbl">사진</span>
+    <img class="photo-prev" id="f_photoPrev"${sheetPhoto?` src="${esc(sheetPhoto)}" style="display:block"`:''}>
+    <div class="photo-drop" id="f_photoDrop">${icon('photo_camera','',20)}사진 선택 / 촬영하기</div>
+    <input type="file" id="f_photoFile" accept="image/*" hidden></label>`;
+}
+function bindCatChips(){
+  document.querySelectorAll('#catChips [data-chip]').forEach(b=>b.addEventListener('click',()=>{
+    sheetCat=b.dataset.chip;
+    document.querySelectorAll('#catChips [data-chip]').forEach(x=>x.classList.toggle('active',x.dataset.chip===sheetCat));
+  }));
+}
+function bindStarPick(){
+  document.querySelectorAll('#starPick [data-star]').forEach(b=>b.addEventListener('click',()=>{
+    sheetStars=+b.dataset.star;
+    document.querySelectorAll('#starPick [data-star]').forEach(x=>x.classList.toggle('on',+x.dataset.star<=sheetStars));
+  }));
+}
+function bindPhoto(){
+  const drop=document.getElementById('f_photoDrop'),file=document.getElementById('f_photoFile'),prev=document.getElementById('f_photoPrev');
+  if(!drop)return;
+  drop.addEventListener('click',()=>file.click());
+  file.addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;toast('사진 처리 중…');
+    try{const d=await resizeImage(f);sheetPhoto=d;prev.src=d;prev.style.display='block';}
+    catch(err){toast('사진을 불러오지 못했어요');}
+  });
+}
+document.getElementById('sheetSave').addEventListener('click',async()=>{
+  const val=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  if(sheetTab==='places'){
+    const name=val('f_name');if(!name){toast('이름을 입력하세요');return;}
+    const obj={id:sheetEditId||uid(),cat:sheetCat||'food',name,addr:val('f_addr'),contact:val('f_contact'),
+      time:val('f_time'),price:val('f_price'),open:val('f_open'),review:val('f_review'),stars:sheetStars,photo:sheetPhoto};
+    upsert('places',KEYS.places,obj,renderPlaces);
+  }else if(sheetTab==='goods'){
+    const name=val('f_name');if(!name){toast('이름을 입력하세요');return;}
+    const obj={id:sheetEditId||uid(),name,desc:val('f_desc'),shop:val('f_shop'),price:val('f_price'),photo:sheetPhoto};
+    upsert('products',KEYS.products,obj,renderGoods);
+  }else{
+    const title=val('f_title');if(!title){toast('제목을 입력하세요');return;}
+    const obj={id:sheetEditId||uid(),cat:sheetCat||'기타',title,body:val('f_body')};
+    upsert('tips',KEYS.tips,obj,renderTips);
+  }
+});
+function upsert(stateKey,storeKey,obj,rerender){
+  const arr=state[stateKey];
+  if(sheetEditId){const i=arr.findIndex(x=>x.id===sheetEditId);if(i>=0)arr[i]=obj;else arr.unshift(obj);}
+  else arr.unshift(obj);
+  save(storeKey,arr);rerender();closeSheet();toast('저장되었어요');
+}
+
+/* ============ Install (PWA) ============ */
 let deferredPrompt=null;
 function isStandalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 const installBtn=document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(!isStandalone())installBtn.style.display='block';});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(!isStandalone())installBtn.style.display='flex';});
 window.addEventListener('appinstalled',()=>{installBtn.style.display='none';deferredPrompt=null;toast('앱이 설치되었어요');});
-installBtn.addEventListener('click',async()=>{
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  try{await deferredPrompt.userChoice;}catch(e){}
-  deferredPrompt=null;installBtn.style.display='none';
-});
-(function(){
-  const ua=navigator.userAgent||'';
-  if(/iphone|ipad|ipod/i.test(ua)&&!isStandalone()){const el=document.getElementById('iosInstall');if(el)el.style.display='block';}
-})();
+installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice;}catch(e){}deferredPrompt=null;installBtn.style.display='none';});
+(function(){const ua=navigator.userAgent||'';if(/iphone|ipad|ipod/i.test(ua)&&!isStandalone()){document.getElementById('iosNote').style.display='block';}})();
 
-/* ============ Maps links ============ */
-function mapsSearch(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
-function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q);}
-
-/* ============ Stars ============ */
-function starHTML(n){let s='';for(let i=1;i<=5;i++)s+=`<span class="${i<=n?'':'empty'}">★</span>`;return s;}
-const starPick=document.getElementById('p_stars');
-starPick.querySelectorAll('span').forEach(s=>{
-  s.addEventListener('click',()=>{pStarVal=+s.dataset.v;paintStars();});
-});
-function paintStars(){starPick.querySelectorAll('span').forEach(s=>s.classList.toggle('on',+s.dataset.v<=pStarVal));}
-
-/* ============ Places ============ */
-function openPlaceModal(item){
-  editId.place=item?item.id:null;
-  document.getElementById('placeModalTitle').textContent=item?'장소 수정':'새 장소 추가';
-  document.getElementById('p_cat').value=item?item.cat:'food';
-  document.getElementById('p_name').value=item?item.name:'';
-  document.getElementById('p_addr').value=item?item.addr||'':'';
-  document.getElementById('p_contact').value=item?item.contact||'':'';
-  document.getElementById('p_time').value=item?item.time||'':'';
-  document.getElementById('p_review').value=item?item.review||'':'';
-  pStarVal=item?item.stars||0:0;paintStars();
-  tmpPhoto.place=item?item.photo||null:null;
-  const pv=document.getElementById('p_preview');
-  if(tmpPhoto.place){pv.src=tmpPhoto.place;pv.style.display='block';}else{pv.style.display='none';}
-  openModal('placeModal');
-}
-document.getElementById('p_drop').addEventListener('click',()=>document.getElementById('p_file').click());
-document.getElementById('p_file').addEventListener('change',async e=>{
-  const f=e.target.files[0];if(!f)return;
-  toast('사진 처리 중…');
-  try{const d=await resizeImage(f);tmpPhoto.place=d;const pv=document.getElementById('p_preview');pv.src=d;pv.style.display='block';}
-  catch(err){toast('사진을 불러오지 못했어요');}
-});
-document.getElementById('p_save').addEventListener('click',async()=>{
-  const name=document.getElementById('p_name').value.trim();
-  if(!name){toast('이름을 입력하세요');return;}
-  const obj={
-    id:editId.place||uid(),cat:document.getElementById('p_cat').value,name,
-    addr:document.getElementById('p_addr').value.trim(),
-    contact:document.getElementById('p_contact').value.trim(),
-    time:document.getElementById('p_time').value.trim(),
-    review:document.getElementById('p_review').value.trim(),
-    stars:pStarVal,photo:tmpPhoto.place
-  };
-  if(editId.place){const i=state.places.findIndex(p=>p.id===editId.place);state.places[i]=obj;}
-  else state.places.unshift(obj);
-  await save(KEYS.places,state.places);renderPlaces();closeModal('placeModal');toast('저장되었어요');
-});
-function delPlace(id){state.places=state.places.filter(p=>p.id!==id);save(KEYS.places,state.places);renderPlaces();toast('삭제되었어요');}
-function renderPlaces(){
-  const list=document.getElementById('placeList');
-  let arr=state.places;
-  if(placeFilter!=='all')arr=arr.filter(p=>p.cat===placeFilter);
-  if(!arr.length){
-    list.innerHTML=`<div class="empty"><div class="icon-3d xl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></div><p>아직 등록된 곳이 없어요.<br>오른쪽 아래 <b>+</b> 버튼으로<br>맛집·명소를 추가해 보세요.</p></div>`;
-    return;
-  }
-  list.innerHTML=arr.map(p=>{
-    const q=(p.name+' '+(p.addr||'')).trim();
-    const badge=p.cat==='food'?'<span class="badge badge-food">🍛 맛집</span>':'<span class="badge badge-spot">📍 명소</span>';
-    return `<div class="item">
-      ${p.photo?`<img class="item-photo" src="${p.photo}">`:''}
-      <div class="item-body">
-        <div class="item-head">${badge}<span class="item-name">${esc(p.name)}</span></div>
-        ${p.stars?`<div class="stars">${starHTML(p.stars).replace(/<span class="empty">★<\/span>/g,'<span class="empty">★</span>')}</div>`:''}
-        ${p.addr?`<div class="item-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>${esc(p.addr)}</div>`:''}
-        ${p.time?`<div class="item-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${esc(p.time)}</div>`:''}
-        ${p.contact?`<div class="item-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z"/></svg>${esc(p.contact)}</div>`:''}
-        ${p.review?`<div class="item-review">${esc(p.review)}</div>`:''}
-        <div class="item-actions">
-          <a class="link-chip" href="${mapsSearch(q)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>지도</a>
-          <a class="link-chip" href="${mapsDir(q)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2Z"/></svg>길찾기·시간</a>
-          ${p.contact?`<a class="link-chip call" href="tel:${p.contact.replace(/[^+\d]/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z"/></svg>전화</a>`:''}
-          <button class="link-chip" onclick='editPlace("${p.id}")'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>수정</button>
-          <button class="link-chip danger" onclick='delPlace("${p.id}")'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>삭제</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-function editPlace(id){openPlaceModal(state.places.find(p=>p.id===id));}
-document.querySelectorAll('.chip-filter').forEach(c=>c.addEventListener('click',()=>{
-  document.querySelectorAll('.chip-filter').forEach(x=>x.classList.remove('active'));
-  c.classList.add('active');placeFilter=c.dataset.filter;renderPlaces();
-}));
-
-/* ============ Products ============ */
-function openProductModal(item){
-  editId.product=item?item.id:null;
-  document.getElementById('productModalTitle').textContent=item?'특산물 수정':'새 특산물 추가';
-  document.getElementById('pr_name').value=item?item.name:'';
-  document.getElementById('pr_desc').value=item?item.desc||'':'';
-  document.getElementById('pr_shop').value=item?item.shop||'':'';
-  document.getElementById('pr_price').value=item?item.price||'':'';
-  tmpPhoto.product=item?item.photo||null:null;
-  const pv=document.getElementById('pr_preview');
-  if(tmpPhoto.product){pv.src=tmpPhoto.product;pv.style.display='block';}else{pv.style.display='none';}
-  openModal('productModal');
-}
-document.getElementById('pr_drop').addEventListener('click',()=>document.getElementById('pr_file').click());
-document.getElementById('pr_file').addEventListener('change',async e=>{
-  const f=e.target.files[0];if(!f)return;toast('사진 처리 중…');
-  try{const d=await resizeImage(f);tmpPhoto.product=d;const pv=document.getElementById('pr_preview');pv.src=d;pv.style.display='block';}
-  catch(err){toast('사진을 불러오지 못했어요');}
-});
-document.getElementById('pr_save').addEventListener('click',async()=>{
-  const name=document.getElementById('pr_name').value.trim();
-  if(!name){toast('이름을 입력하세요');return;}
-  const obj={id:editId.product||uid(),name,
-    desc:document.getElementById('pr_desc').value.trim(),
-    shop:document.getElementById('pr_shop').value.trim(),
-    price:document.getElementById('pr_price').value.trim(),
-    photo:tmpPhoto.product};
-  if(editId.product){const i=state.products.findIndex(p=>p.id===editId.product);state.products[i]=obj;}
-  else state.products.unshift(obj);
-  await save(KEYS.products,state.products);renderProducts();closeModal('productModal');toast('저장되었어요');
-});
-function delProduct(id){state.products=state.products.filter(p=>p.id!==id);save(KEYS.products,state.products);renderProducts();toast('삭제되었어요');}
-function editProduct(id){openProductModal(state.products.find(p=>p.id===id));}
-function renderProducts(){
-  const list=document.getElementById('productList');
-  if(!state.products.length){
-    list.innerHTML=`<div class="empty"><div class="icon-3d xl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></div><p>사고 싶은 인도 특산물을<br>+ 버튼으로 기록해 보세요.<br><span style="font-size:12px">다즐링 홍차 · 향신료 · 파슈미나 · 가죽제품 등</span></p></div>`;
-    return;
-  }
-  list.innerHTML=state.products.map(p=>{
-    const krw=p.price?` <span style="color:var(--text-tertiary);font-weight:400">(≈ ${Math.round(parseFloat(p.price)*state.rate).toLocaleString()}원)</span>`:'';
-    return `<div class="item">
-      ${p.photo?`<img class="item-photo" src="${p.photo}">`:''}
-      <div class="item-body">
-        <div class="item-head"><span class="item-name">${esc(p.name)}</span></div>
-        ${p.price?`<div class="item-meta" style="font-weight:600;color:var(--cobalt-700)">₹${esc(p.price)}${krw}</div>`:''}
-        ${p.desc?`<div class="item-review">${esc(p.desc)}</div>`:''}
-        ${p.shop?`<div class="item-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 9l1.5-5h15L21 9M5 9v11h14V9"/></svg>${esc(p.shop)}</div>`:''}
-        <div class="item-actions">
-          ${p.shop?`<a class="link-chip" href="${mapsSearch(p.shop+' Delhi')}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>구매처 지도</a>`:''}
-          <button class="link-chip" onclick='editProduct("${p.id}")'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>수정</button>
-          <button class="link-chip danger" onclick='delProduct("${p.id}")'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>삭제</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ============ Tips ============ */
-function openTipModal(item){
-  editId.tip=item?item.id:null;
-  document.getElementById('tipModalTitle').textContent=item?'팁 수정':'새 팁 추가';
-  document.getElementById('t_cat').value=item?item.cat:'교통';
-  document.getElementById('t_title').value=item?item.title:'';
-  document.getElementById('t_body').value=item?item.body||'':'';
-  openModal('tipModal');
-}
-document.getElementById('t_save').addEventListener('click',async()=>{
-  const title=document.getElementById('t_title').value.trim();
-  if(!title){toast('제목을 입력하세요');return;}
-  const obj={id:editId.tip||uid(),cat:document.getElementById('t_cat').value,title,body:document.getElementById('t_body').value.trim()};
-  if(editId.tip){const i=state.tips.findIndex(t=>t.id===editId.tip);state.tips[i]=obj;}
-  else state.tips.unshift(obj);
-  await save(KEYS.tips,state.tips);renderTips();closeModal('tipModal');toast('저장되었어요');
-});
-function delTip(id){state.tips=state.tips.filter(t=>t.id!==id);save(KEYS.tips,state.tips);renderTips();toast('삭제되었어요');}
-function editTip(id){openTipModal(state.tips.find(t=>t.id===id));}
-function renderTips(){
-  const list=document.getElementById('tipList');
-  if(!state.tips.length){
-    list.innerHTML=`<div class="empty"><div class="icon-3d xl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1v.2h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z"/></svg></div><p>현지 생활 꿀팁을<br>+ 버튼으로 모아보세요.</p></div>`;
-    return;
-  }
-  list.innerHTML=state.tips.map(t=>`<div class="tip">
-    <div class="tip-head"><span class="tip-cat">${esc(t.cat)}</span>
-      <span style="display:flex;gap:2px">
-        <button class="x-btn" onclick='editTip("${t.id}")' style="color:var(--cobalt-300)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-        <button class="x-btn" onclick='delTip("${t.id}")'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-      </span>
-    </div>
-    <div class="tip-title">${esc(t.title)}</div>
-    ${t.body?`<div class="tip-body">${esc(t.body)}</div>`:''}
-  </div>`).join('');
-}
-
-/* ============ Util ============ */
-function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-/* ============ Seed (첫 실행 예시) ============ */
+/* ============ Seed ============ */
 function seed(){
-  state.places=[{id:uid(),cat:'spot',name:'Qutub Minar (꾸뜹 미나르)',addr:'Mehrauli, New Delhi',contact:'',time:'시내에서 차로 약 40분',review:'세계문화유산. 73m 높이의 벽돌 미나렛. 오전 일찍 가면 한산해요.',stars:5,photo:null},
-    {id:uid(),cat:'food',name:'Saravana Bhavan',addr:'Connaught Place, New Delhi',contact:'+91 11 4350 0000',time:'',review:'깔끔한 남인도 채식. 마살라 도사 강추, 위생 안심.',stars:4,photo:null}];
-  state.products=[{id:uid(),name:'다즐링 홍차',desc:'세계 3대 홍차. 선물용으로 인기. 봉인된 정품을 고르세요.',shop:'Khan Market',price:'400',photo:null},
-    {id:uid(),name:'파슈미나 숄',desc:'캐시미어 숄. 라벨·촉감 확인 필수(가짜 많음).',shop:'Dilli Haat',price:'2500',photo:null}];
-  state.tips=[{id:uid(),cat:'교통',title:'우버/올라 적극 활용',body:'NCR에서는 우버(Uber)·올라(Ola) 앱이 흥정 스트레스 없이 편해요. 차량 번호 꼭 대조하고 탑승하세요.'},
-    {id:uid(),cat:'건강',title:'물은 무조건 생수',body:'봉인된 생수(Bisleri 등)만 마시기. 길거리 얼음·생채소 주의. 지사제 상비.'}];
+  state.places=[
+    {id:uid(),cat:'sight',name:'Lotus Temple',addr:'Kalkaji, New Delhi',contact:'',time:'차로 28분',price:'무료',open:'09:00–17:30',review:'연꽃 모양 바하이 사원. 입장 무료, 명상 공간.',stars:4.6,photo:null},
+    {id:uid(),cat:'food',name:'Bukhara',addr:'ITC Maurya · Diplomatic Enclave',contact:'',time:'차로 25분',price:'₹₹₹₹',open:'영업 중 · ~23:30',review:'북인도 화덕(탄두르) 요리의 정석. 달 부카라는 꼭.',stars:4.8,photo:null},
+    {id:uid(),cat:'cafe',name:'Blue Tokai Coffee',addr:'Khan Market',contact:'',time:'차로 20분',price:'₹₹',open:'영업 중 · ~21:00',review:'인도 스페셜티 커피 1세대. 콜드브루 추천.',stars:4.6,photo:null},
+    {id:uid(),cat:'bar',name:'Soi 7 Brewpub',addr:'Cyber Hub · Gurgaon',contact:'',time:'차로 18분',price:'₹₹₹',open:'영업 중 · ~01:00',review:'수제맥주 펍. 사이버허브 야경 보며 한 잔.',stars:4.3,photo:null},
+    {id:uid(),cat:'shop',name:'Dilli Haat',addr:'INA',contact:'',time:'차로 22분',price:'₹100',open:'10:30–22:00',review:'전국 수공예 직거래 시장. 흥정 필수, 기념품 천국.',stars:4.5,photo:null},
+    {id:uid(),cat:'barber',name:'Truefitt & Hill',addr:'Khan Market',contact:'',time:'차로 20분',price:'₹₹₹',open:'10:00–20:00',review:'영국 왕실 이발소 브랜드. 핫타월 면도 경험.',stars:4.7,photo:null},
+  ];
+  state.products=[
+    {id:uid(),name:'다즐링 홍차',desc:'향이 섬세한 퍼스트 플러시 추천. 봉인된 정품 확인.',shop:'Dilli Haat / 차 전문점',price:'350',photo:null},
+    {id:uid(),name:'파슈미나 숄',desc:'캐시미어 혼방 주의, 손으로 짠 것 확인.',shop:'Janpath Market',price:'2500',photo:null},
+    {id:uid(),name:'마살라 향신료 세트',desc:'가람 마살라·강황 인기. 밀봉 포장 요청.',shop:'Khari Baoli 시장',price:'400',photo:null},
+    {id:uid(),name:'블록프린트 면직물',desc:'천연염색 손날염. 식탁보·스카프로 좋음.',shop:'Dilli Haat',price:'600',photo:null},
+  ];
+  state.tips=[
+    {id:uid(),cat:'교통',title:'릭샤보다 Uber·Ola 앱',body:'오토릭샤는 미터를 잘 안 켜요. 앱으로 부르면 요금이 정해져 흥정 스트레스가 없습니다. 차량 번호 대조 필수.'},
+    {id:uid(),cat:'안전',title:'물은 무조건 생수',body:'수돗물·얼음 주의. 식당에서도 밀봉 생수(Bisleri) 확인하고 받으세요.'},
+    {id:uid(),cat:'통신·결제',title:'공항에서 유심 먼저',body:'Airtel·Jio 유심을 공항에서 개통. UPI가 안 되면 현금이 편할 때가 많아요.'},
+    {id:uid(),cat:'건강',title:'델리벨리 대비',body:'지사제·전해질 분말을 챙기고, 도착 첫 며칠은 익힌 음식 위주로.'},
+  ];
 }
 
 /* ============ Init ============ */
+async function migrate(){
+  // 이전 데이터 호환: cat 'spot' → 'sight'
+  let changed=false;
+  state.places.forEach(p=>{if(p.cat==='spot'){p.cat='sight';changed=true;}});
+  if(changed)await save(KEYS.places,state.places);
+}
 async function init(){
+  buildNav();buildPlaceCats();buildTipCats();
   const seeded=await load('ncr:seeded',false);
   state.rate=await load(KEYS.rate,15.7);
   state.places=await load(KEYS.places,[]);
@@ -822,13 +804,15 @@ async function init(){
     await save(KEYS.places,state.places);await save(KEYS.products,state.products);
     await save(KEYS.tips,state.tips);await save('ncr:seeded',true);
   }
-  renderRate();renderPlaces();renderProducts();renderTips();
+  await migrate();
+  renderRate();renderPlaces();renderGoods();renderTips();
+  switchTab('exchange');
   fetchLiveRate();
 }
 init();
 </script>
 <script>
-/* PWA service worker — 오프라인 지원 + 설치 가능 */
+/* PWA service worker */
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
 }
