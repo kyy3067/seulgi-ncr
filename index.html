@@ -282,8 +282,10 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
   <main class="content">
     <!-- ===== 환율 ===== -->
     <section id="view-fx" class="view active">
+      <button id="installBtn" class="btn btn-primary btn-block" style="display:none;margin-bottom:14px">📲 홈 화면에 앱 설치</button>
+      <div id="iosInstall" class="note" style="display:none;text-align:center;background:var(--cobalt-50);color:var(--cobalt-700);padding:10px 14px;border-radius:var(--radius-md);margin-bottom:14px">🍎 아이폰: 사파리 하단 <b>공유</b> → <b>"홈 화면에 추가"</b>로 앱처럼 설치할 수 있어요.</div>
       <div class="fx-card">
-        <div class="fx-rate-line">실시간 기준 환율 (직접 수정 가능)</div>
+        <div class="fx-rate-line" id="fxStatus">환율 불러오는 중…</div>
         <div class="fx-rate-big">₹1 = <span id="rateDisplay">15.7</span><small> 원</small></div>
         <div class="fx-conv">
           <div class="fx-swap">
@@ -295,7 +297,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-3 3 3 3M4 13h12M17 14l3-3-3-3M20 11H8"/></svg>
             </button>
             <div class="fx-inp-wrap">
-              <input type="number" inputmode="decimal" id="krwInput" class="fx-inp" placeholder="0" readonly>
+              <input type="text" inputmode="decimal" id="krwInput" class="fx-inp" placeholder="0" readonly>
               <span class="cur" id="botCur">KRW ₩</span>
             </div>
           </div>
@@ -306,9 +308,10 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
             <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.85)">원</span>
             <button class="btn btn-sm" style="background:rgba(255,255,255,.92);color:var(--cobalt-700)" id="saveRate">저장</button>
           </div>
+          <button id="fxRefresh" style="margin-top:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;padding:9px 18px;border-radius:9999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🔄 실시간 환율 새로고침</button>
         </div>
       </div>
-      <p class="note" style="text-align:center">기본값은 최근 시세(약 15.7원/루피) 기준입니다. 매일 변동되니 환전 전 실제 환율을 확인하고 위에서 값을 수정해 두세요.</p>
+      <p class="note" style="text-align:center">앱을 열면 실시간 환율을 자동으로 불러옵니다(매일 갱신). 오프라인이면 마지막 저장값을 사용해요. 필요하면 위에서 직접 수정해 저장할 수도 있습니다.</p>
 
       <div class="card" style="margin-top:18px">
         <div class="icon-3d" style="margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
@@ -568,6 +571,49 @@ function renderQuick(){
   box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{inrInput.value=b.dataset.a;convert();}));
 }
 
+/* ============ 실시간 환율 ============ */
+const FX_API='https://open.er-api.com/v6/latest/INR';
+const FX_BACKUP='https://api.frankfurter.app/latest?from=INR&to=KRW';
+function fmtUpdated(ts){const d=new Date(ts);const p=n=>String(n).padStart(2,'0');return (d.getMonth()+1)+'/'+d.getDate()+' '+p(d.getHours())+':'+p(d.getMinutes());}
+async function fetchLiveRate(manual){
+  const status=document.getElementById('fxStatus');
+  if(manual)status.textContent='새로고침 중…';
+  let rate=null;
+  try{const r=await fetch(FX_API,{cache:'no-store'});const j=await r.json();if(j&&j.result==='success'&&j.rates&&j.rates.KRW)rate=j.rates.KRW;}catch(e){}
+  if(!rate){try{const r=await fetch(FX_BACKUP,{cache:'no-store'});const j=await r.json();if(j&&j.rates&&j.rates.KRW)rate=j.rates.KRW;}catch(e){}}
+  if(rate){
+    state.rate=Math.round(rate*100)/100;
+    await save(KEYS.rate,state.rate);
+    const now=Date.now();await save('ncr:rateUpdated',now);
+    renderRate();
+    status.textContent='실시간 환율 · '+fmtUpdated(now)+' 기준';
+    if(manual)toast('실시간 환율을 불러왔어요');
+    return true;
+  }
+  const ts=await load('ncr:rateUpdated',null);
+  status.textContent=ts?('오프라인 · 저장값('+fmtUpdated(ts)+' 기준)'):'저장값 사용 중 (직접 수정 가능)';
+  if(manual)toast('환율을 불러오지 못했어요 (오프라인)');
+  return false;
+}
+document.getElementById('fxRefresh').addEventListener('click',()=>fetchLiveRate(true));
+
+/* ============ 앱 설치 (PWA) ============ */
+let deferredPrompt=null;
+function isStandalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
+const installBtn=document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(!isStandalone())installBtn.style.display='block';});
+window.addEventListener('appinstalled',()=>{installBtn.style.display='none';deferredPrompt=null;toast('앱이 설치되었어요');});
+installBtn.addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  try{await deferredPrompt.userChoice;}catch(e){}
+  deferredPrompt=null;installBtn.style.display='none';
+});
+(function(){
+  const ua=navigator.userAgent||'';
+  if(/iphone|ipad|ipod/i.test(ua)&&!isStandalone()){const el=document.getElementById('iosInstall');if(el)el.style.display='block';}
+})();
+
 /* ============ Maps links ============ */
 function mapsSearch(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q);}
@@ -777,6 +823,7 @@ async function init(){
     await save(KEYS.tips,state.tips);await save('ncr:seeded',true);
   }
   renderRate();renderPlaces();renderProducts();renderTips();
+  fetchLiveRate();
 }
 init();
 </script>
