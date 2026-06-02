@@ -267,20 +267,6 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 .btn-cancel{flex:1; height:50px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
 .btn-save{flex:1.6; height:50px; border-radius:var(--radius-sm); border:none; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
 
-/* ===== 비밀번호(잠금) ===== */
-.lock-btn{border:none; background:transparent; cursor:pointer; color:var(--subtext); display:flex; align-items:center; padding:6px; border-radius:8px; flex-shrink:0;}
-.lock-btn:active{background:var(--surface2);}
-.lock-btn .msr.fill{color:var(--accent);}
-.pin-overlay{position:fixed; inset:0; z-index:120; background:rgba(15,16,25,.45); display:none; align-items:center; justify-content:center; padding:24px; animation:fadeIn .2s ease;}
-.pin-overlay.open{display:flex;}
-.pin-box{width:100%; max-width:340px; background:var(--surface); border-radius:20px; padding:24px 22px; box-shadow:0 16px 48px rgba(0,0,0,.18); text-align:center;}
-.pin-icon{width:52px; height:52px; border-radius:14px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; margin:0 auto 14px;}
-.pin-icon .msr{font-size:26px;}
-.pin-box h3{margin:0 0 6px; font-size:18px; font-weight:800; color:var(--text);}
-.pin-sub{margin:0 0 16px; font-size:13px; color:var(--subtext); line-height:1.5;}
-.pin-input{width:100%; box-sizing:border-box; height:46px; padding:0 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); font-family:inherit; font-size:16px; color:var(--text); outline:none; text-align:center; margin-bottom:10px;}
-.pin-input:focus{border-color:var(--accent); background:var(--surface);}
-.pin-actions{display:flex; gap:10px; margin-top:6px;}
 
 /* ===== Toast ===== */
 .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); white-space:nowrap; pointer-events:none;}
@@ -333,7 +319,6 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
     <div class="brand-logo"><span class="msr fill" style="font-size:19px">spa</span></div>
     <div class="brand-name">슬기로운 NCR</div>
     <div class="brand-loc"><span class="msr fill" style="font-size:16px">location_on</span>Delhi NCR</div>
-    <button id="lockBtn" class="lock-btn" title="수정·삭제 비밀번호"><span class="msr" style="font-size:18px">lock_open</span></button>
   </header>
 
   <main class="content">
@@ -433,21 +418,11 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
   </div>
 </div>
 
-<div class="pin-overlay" id="pinOverlay">
-  <div class="pin-box">
-    <div class="pin-icon"><span class="msr fill">lock</span></div>
-    <h3 id="pinTitle">비밀번호 입력</h3>
-    <p class="pin-sub" id="pinSub"></p>
-    <input id="pinInput" class="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호">
-    <input id="pinInput2" class="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 확인" style="display:none">
-    <div class="pin-actions">
-      <button class="btn-cancel" id="pinCancel">취소</button>
-      <button class="btn-save" id="pinOk">확인</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
 /* ============ IndexedDB ============ */
@@ -480,7 +455,7 @@ function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='
 function icon(name,cls,size){return `<span class="msr${cls?' '+cls:''}"${size?` style="font-size:${size}px"`:''}>${name}</span>`;}
 
 /* ============ Image resize ============ */
-function resizeImage(file,max=900,quality=.72){
+function resizeImage(file,max=800,quality=.6){
   return new Promise((res,rej)=>{
     const reader=new FileReader();
     reader.onload=e=>{
@@ -525,6 +500,16 @@ let curTab='exchange';
 let placeFilter='all';
 let placeQuery='';
 let tipFilter='전체';
+
+/* ============ Firebase (공용 백엔드) ============ */
+const firebaseConfig={apiKey:"AIzaSyDxluHCYkKeO9hoZMwjMkUu6JiP2gfKOz8",authDomain:"inventory-5b5ac.firebaseapp.com",projectId:"inventory-5b5ac",storageBucket:"inventory-5b5ac.firebasestorage.app",messagingSenderId:"1045174877932",appId:"1:1045174877932:web:e36f0b02ef0beefe3c2fc9"};
+firebase.initializeApp(firebaseConfig);
+const fbAuth=firebase.auth();
+const fdb=firebase.firestore();
+try{fdb.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
+const COL={places:'ncr_places',products:'ncr_products',tips:'ncr_tips'};
+let myUid=null;
+function tsNow(){return firebase.firestore.FieldValue.serverTimestamp();}
 
 /* ============ Navigation ============ */
 function buildNav(){
@@ -617,6 +602,8 @@ function placeCardHTML(p){
   const review=p.review?`<p class="pcard-review">${esc(p.review)}</p>`:'';
   const open=p.open?`<span class="open${String(p.open).includes('영업 중')?' now':''}">${esc(p.open)}</span>`:'<span></span>';
   const tel=p.contact?`<a class="tool" href="tel:${esc(String(p.contact).replace(/[^+\d]/g,''))}">${icon('call','',16)}전화</a>`:'';
+  const own=p.ownerUid&&p.ownerUid===myUid;
+  const ownTools=own?`<button class="tool" data-edit-place="${p.id}">${icon('edit','',16)}수정</button><button class="tool danger" data-del-place="${p.id}">${icon('delete','',16)}삭제</button>`:'';
   return `<div class="card pcard"><div class="pcard-inner">
     ${photo}
     <div class="pcard-body">
@@ -631,8 +618,7 @@ function placeCardHTML(p){
       <div class="row-tools">
         <a class="tool" href="${mapsSearch(q)}" target="_blank" rel="noopener">${icon('map','',16)}지도</a>
         ${tel}
-        <button class="tool" data-edit-place="${p.id}">${icon('edit','',16)}수정</button>
-        <button class="tool danger" data-del-place="${p.id}">${icon('delete','',16)}삭제</button>
+        ${ownTools}
       </div>
     </div>
   </div></div>`;
@@ -651,13 +637,14 @@ function renderPlaces(){
     return;
   }
   list.innerHTML=arr.map(placeCardHTML).join('');
-  list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace));}));
-  list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())delPlace(b.dataset.delPlace);}));
+  list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',()=>openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace))));
+  list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',()=>delPlace(b.dataset.delPlace)));
 }
-function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;state.places=state.places.filter(p=>p.id!==id);save(KEYS.places,state.places);renderPlaces();toast('삭제되었어요');}
+function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.collection(COL.places).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
 /* ============ Goods ============ */
 function goodsCardHTML(g){
+  const own=g.ownerUid&&g.ownerUid===myUid;
   const photo=g.photo?`<img class="gcard-photo" src="${esc(g.photo)}" alt="">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
   const priceNum=parseFloat(g.price);
   const krw=(priceNum>0)?` <span class="krw">(≈ ${fmt(Math.round(priceNum*state.rate))}원)</span>`:'';
@@ -666,10 +653,10 @@ function goodsCardHTML(g){
   const where=g.shop?`<a class="gcard-where" href="${mapsSearch(g.shop+' Delhi')}" target="_blank" rel="noopener">${icon('storefront','b',14)}<span class="nm">${esc(g.shop)}</span></a>`:'';
   return `<div class="card gcard">${photo}<div class="gcard-body">
     <div class="gcard-name">${esc(g.name)}</div>${price}${note}${where}
-    <div class="gcard-tools">
+    ${own?`<div class="gcard-tools">
       <button class="tool" data-edit-good="${g.id}">${icon('edit','',16)}수정</button>
       <button class="tool danger" data-del-good="${g.id}">${icon('delete','',16)}삭제</button>
-    </div>
+    </div>`:''}
   </div></div>`;
 }
 function renderGoods(){
@@ -679,10 +666,10 @@ function renderGoods(){
     return;
   }
   list.innerHTML=state.products.map(goodsCardHTML).join('');
-  list.querySelectorAll('[data-edit-good]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())openSheet('goods',state.products.find(x=>x.id===b.dataset.editGood));}));
-  list.querySelectorAll('[data-del-good]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())delGood(b.dataset.delGood);}));
+  list.querySelectorAll('[data-edit-good]').forEach(b=>b.addEventListener('click',()=>openSheet('goods',state.products.find(x=>x.id===b.dataset.editGood))));
+  list.querySelectorAll('[data-del-good]').forEach(b=>b.addEventListener('click',()=>delGood(b.dataset.delGood)));
 }
-function delGood(id){if(!confirm('이 특산물을 삭제할까요?'))return;state.products=state.products.filter(p=>p.id!==id);save(KEYS.products,state.products);renderGoods();toast('삭제되었어요');}
+function delGood(id){if(!confirm('이 특산물을 삭제할까요?'))return;fdb.collection(COL.products).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
 /* ============ Tips ============ */
 function buildTipCats(){
@@ -697,13 +684,14 @@ function buildTipCats(){
   }));
 }
 function tipCardHTML(t){
+  const own=t.ownerUid&&t.ownerUid===myUid;
   return `<div class="card tcard">
     <div class="tcard-head">
       <span class="tcat">${icon(TIP_ICON[t.cat]||'label','b',14)}${esc(t.cat)}</span>
-      <span class="tcard-tools">
+      ${own?`<span class="tcard-tools">
         <button class="tool" data-edit-tip="${t.id}">${icon('edit','',16)}</button>
         <button class="tool danger" data-del-tip="${t.id}">${icon('delete','',16)}</button>
-      </span>
+      </span>`:''}
     </div>
     <div class="tcard-title">${esc(t.title)}</div>
     ${t.body?`<p class="tcard-body">${esc(t.body)}</p>`:''}
@@ -717,10 +705,10 @@ function renderTips(){
     return;
   }
   list.innerHTML=arr.map(tipCardHTML).join('');
-  list.querySelectorAll('[data-edit-tip]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())openSheet('tips',state.tips.find(x=>x.id===b.dataset.editTip));}));
-  list.querySelectorAll('[data-del-tip]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())delTip(b.dataset.delTip);}));
+  list.querySelectorAll('[data-edit-tip]').forEach(b=>b.addEventListener('click',()=>openSheet('tips',state.tips.find(x=>x.id===b.dataset.editTip))));
+  list.querySelectorAll('[data-del-tip]').forEach(b=>b.addEventListener('click',()=>delTip(b.dataset.delTip)));
 }
-function delTip(id){if(!confirm('이 팁을 삭제할까요?'))return;state.tips=state.tips.filter(t=>t.id!==id);save(KEYS.tips,state.tips);renderTips();toast('삭제되었어요');}
+function delTip(id){if(!confirm('이 팁을 삭제할까요?'))return;fdb.collection(COL.tips).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
 /* ============ Add / Edit sheet ============ */
 const sheetOverlay=document.getElementById('sheetOverlay');
@@ -807,93 +795,32 @@ function bindPhoto(){
   });
 }
 document.getElementById('sheetSave').addEventListener('click',async()=>{
+  if(!myUid){toast('연결 중이에요. 잠시 후 다시 시도해 주세요');return;}
   const val=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  let col,data;
   if(sheetTab==='places'){
     const name=val('f_name');if(!name){toast('이름을 입력하세요');return;}
-    const obj={id:sheetEditId||uid(),cat:sheetCat||'food',name,addr:val('f_addr'),contact:val('f_contact'),
-      time:val('f_time'),price:val('f_price'),open:val('f_open'),review:val('f_review'),stars:sheetStars,photo:sheetPhoto};
-    upsert('places',KEYS.places,obj,renderPlaces);
+    col=COL.places;
+    data={name,cat:sheetCat||'food',addr:val('f_addr'),contact:val('f_contact'),time:val('f_time'),
+      price:val('f_price'),open:val('f_open'),review:val('f_review'),stars:Number(sheetStars)||0,photo:sheetPhoto||null};
   }else if(sheetTab==='goods'){
     const name=val('f_name');if(!name){toast('이름을 입력하세요');return;}
-    const obj={id:sheetEditId||uid(),name,desc:val('f_desc'),shop:val('f_shop'),price:val('f_price'),photo:sheetPhoto};
-    upsert('products',KEYS.products,obj,renderGoods);
+    col=COL.products;
+    data={name,desc:val('f_desc'),shop:val('f_shop'),price:val('f_price'),photo:sheetPhoto||null};
   }else{
     const title=val('f_title');if(!title){toast('제목을 입력하세요');return;}
-    const obj={id:sheetEditId||uid(),cat:sheetCat||'기타',title,body:val('f_body')};
-    upsert('tips',KEYS.tips,obj,renderTips);
+    col=COL.tips;
+    data={cat:sheetCat||'기타',title,body:val('f_body')};
   }
+  const btn=document.getElementById('sheetSave');btn.disabled=true;
+  try{
+    if(sheetEditId){await fdb.collection(col).doc(sheetEditId).update(data);}
+    else{await fdb.collection(col).add(Object.assign({ownerUid:myUid,createdAt:tsNow()},data));}
+    closeSheet();toast('저장되었어요');
+  }catch(e){
+    toast(e.code==='permission-denied'?'본인이 올린 글만 수정할 수 있어요':'저장에 실패했어요');
+  }finally{btn.disabled=false;}
 });
-function upsert(stateKey,storeKey,obj,rerender){
-  const arr=state[stateKey];
-  if(sheetEditId){const i=arr.findIndex(x=>x.id===sheetEditId);if(i>=0)arr[i]=obj;else arr.unshift(obj);}
-  else arr.unshift(obj);
-  save(storeKey,arr);rerender();closeSheet();toast('저장되었어요');
-}
-
-/* ============ 수정·삭제 비밀번호 ============ */
-let _unlocked=false;
-async function sha(s){
-  try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}}catch(e){}
-  let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return 'f'+h.toString(16);
-}
-function askPin(opts={}){
-  return new Promise(resolve=>{
-    const ov=document.getElementById('pinOverlay');
-    document.getElementById('pinTitle').textContent=opts.title||'비밀번호 입력';
-    const sub=document.getElementById('pinSub');sub.textContent=opts.sub||'';sub.style.display=opts.sub?'block':'none';
-    const i1=document.getElementById('pinInput'),i2=document.getElementById('pinInput2');
-    i1.value='';i2.value='';i2.style.display=opts.confirm?'block':'none';
-    document.getElementById('pinOk').textContent=opts.okLabel||'확인';
-    ov.classList.add('open');document.body.style.overflow='hidden';
-    setTimeout(()=>i1.focus(),50);
-    const ok=document.getElementById('pinOk'),cancel=document.getElementById('pinCancel');
-    function cleanup(val){ov.classList.remove('open');document.body.style.overflow='';ok.onclick=cancel.onclick=ov.onclick=i1.onkeydown=i2.onkeydown=null;resolve(val);}
-    function onOk(){
-      const v=i1.value;
-      if(opts.confirm&&v!==i2.value){toast('비밀번호가 일치하지 않아요');return;}
-      if(!opts.allowEmpty&&v===''){toast('비밀번호를 입력하세요');return;}
-      cleanup(v);
-    }
-    ok.onclick=onOk;cancel.onclick=()=>cleanup(null);
-    ov.onclick=e=>{if(e.target===ov)cleanup(null);};
-    i1.onkeydown=i2.onkeydown=e=>{if(e.key==='Enter')onOk();if(e.key==='Escape')cleanup(null);};
-  });
-}
-async function requireAuth(){
-  if(_unlocked)return true;
-  const hash=await load('ncr:pinHash',null);
-  if(!hash){
-    const p=await askPin({title:'수정·삭제 비밀번호 설정',sub:'앞으로 수정·삭제하려면 이 비밀번호가 필요해요.',confirm:true,okLabel:'설정'});
-    if(p==null)return false;
-    await save('ncr:pinHash',await sha(p));_unlocked=true;updateLockIcon();toast('비밀번호가 설정됐어요');return true;
-  }
-  const p=await askPin({title:'비밀번호 입력',sub:'수정·삭제하려면 비밀번호를 입력하세요.'});
-  if(p==null)return false;
-  if(await sha(p)===hash){_unlocked=true;return true;}
-  toast('비밀번호가 일치하지 않아요');return false;
-}
-async function managePin(){
-  const hash=await load('ncr:pinHash',null);
-  if(!hash){
-    const p=await askPin({title:'수정·삭제 비밀번호 설정',sub:'수정·삭제를 보호할 비밀번호를 정하세요.',confirm:true,okLabel:'설정'});
-    if(p!=null){await save('ncr:pinHash',await sha(p));_unlocked=true;updateLockIcon();toast('비밀번호가 설정됐어요');}
-    return;
-  }
-  const cur=await askPin({title:'현재 비밀번호 입력',sub:'변경·해제하려면 현재 비밀번호가 필요해요.'});
-  if(cur==null)return;
-  if(await sha(cur)!==hash){toast('비밀번호가 일치하지 않아요');return;}
-  const np=await askPin({title:'새 비밀번호',sub:'비워두고 저장하면 비밀번호가 해제됩니다.',confirm:true,allowEmpty:true,okLabel:'저장'});
-  if(np==null)return;
-  if(np===''){await save('ncr:pinHash',null);_unlocked=true;updateLockIcon();toast('비밀번호가 해제됐어요');}
-  else{await save('ncr:pinHash',await sha(np));_unlocked=true;updateLockIcon();toast('비밀번호가 변경됐어요');}
-}
-async function updateLockIcon(){
-  const has=!!(await load('ncr:pinHash',null));
-  const el=document.getElementById('lockBtn');if(!el)return;
-  const m=el.querySelector('.msr');m.textContent=has?'lock':'lock_open';m.className='msr'+(has?' fill':'');
-  el.title=has?'수정·삭제 잠금 (설정됨) · 변경/해제':'수정·삭제 비밀번호 설정';
-}
-document.getElementById('lockBtn').addEventListener('click',managePin);
 
 /* ============ Install (PWA) ============ */
 let deferredPrompt=null;
@@ -904,32 +831,14 @@ window.addEventListener('appinstalled',()=>{installBtn.style.display='none';defe
 installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice;}catch(e){}deferredPrompt=null;installBtn.style.display='none';});
 (function(){const ua=navigator.userAgent||'';if(/iphone|ipad|ipod/i.test(ua)&&!isStandalone()){document.getElementById('iosNote').style.display='block';}})();
 
-/* ============ Seed ============ */
-function seed(){
-  state.places=[
-    {id:uid(),cat:'sight',name:'Lotus Temple',addr:'Kalkaji, New Delhi',contact:'',time:'차로 28분',price:'무료',open:'09:00–17:30',review:'연꽃 모양 바하이 사원. 입장 무료, 명상 공간.',stars:4.6,photo:null},
-    {id:uid(),cat:'food',name:'Bukhara',addr:'ITC Maurya · Diplomatic Enclave',contact:'',time:'차로 25분',price:'₹₹₹₹',open:'영업 중 · ~23:30',review:'북인도 화덕(탄두르) 요리의 정석. 달 부카라는 꼭.',stars:4.8,photo:null},
-    {id:uid(),cat:'cafe',name:'Blue Tokai Coffee',addr:'Khan Market',contact:'',time:'차로 20분',price:'₹₹',open:'영업 중 · ~21:00',review:'인도 스페셜티 커피 1세대. 콜드브루 추천.',stars:4.6,photo:null},
-    {id:uid(),cat:'bar',name:'Soi 7 Brewpub',addr:'Cyber Hub · Gurgaon',contact:'',time:'차로 18분',price:'₹₹₹',open:'영업 중 · ~01:00',review:'수제맥주 펍. 사이버허브 야경 보며 한 잔.',stars:4.3,photo:null},
-    {id:uid(),cat:'shop',name:'Dilli Haat',addr:'INA',contact:'',time:'차로 22분',price:'₹100',open:'10:30–22:00',review:'전국 수공예 직거래 시장. 흥정 필수, 기념품 천국.',stars:4.5,photo:null},
-    {id:uid(),cat:'barber',name:'Truefitt & Hill',addr:'Khan Market',contact:'',time:'차로 20분',price:'₹₹₹',open:'10:00–20:00',review:'영국 왕실 이발소 브랜드. 핫타월 면도 경험.',stars:4.7,photo:null},
-  ];
-  state.products=[
-    {id:uid(),name:'다즐링 홍차',desc:'향이 섬세한 퍼스트 플러시 추천. 봉인된 정품 확인.',shop:'Dilli Haat / 차 전문점',price:'350',photo:null},
-    {id:uid(),name:'파슈미나 숄',desc:'캐시미어 혼방 주의, 손으로 짠 것 확인.',shop:'Janpath Market',price:'2500',photo:null},
-    {id:uid(),name:'마살라 향신료 세트',desc:'가람 마살라·강황 인기. 밀봉 포장 요청.',shop:'Khari Baoli 시장',price:'400',photo:null},
-    {id:uid(),name:'블록프린트 면직물',desc:'천연염색 손날염. 식탁보·스카프로 좋음.',shop:'Dilli Haat',price:'600',photo:null},
-  ];
-  state.tips=[
-    {id:uid(),cat:'교통',title:'릭샤보다 Uber·Ola 앱',body:'오토릭샤는 미터를 잘 안 켜요. 앱으로 부르면 요금이 정해져 흥정 스트레스가 없습니다. 차량 번호 대조 필수.'},
-    {id:uid(),cat:'안전',title:'물은 무조건 생수',body:'수돗물·얼음 주의. 식당에서도 밀봉 생수(Bisleri) 확인하고 받으세요.'},
-    {id:uid(),cat:'통신·결제',title:'공항에서 유심 먼저',body:'Airtel·Jio 유심을 공항에서 개통. UPI가 안 되면 현금이 편할 때가 많아요.'},
-    {id:uid(),cat:'건강',title:'델리벨리 대비',body:'지사제·전해질 분말을 챙기고, 도착 첫 며칠은 익힌 음식 위주로.'},
-  ];
-}
-
-/* ============ 추가 콘텐츠 (그레이터 노이다 · 신규 특산물) ============ */
-const GN_PLACES=[
+/* ============ 공용 데이터 시드 (델리·그레이터 노이다) ============ */
+const SEED_PLACES=[
+  {cat:'sight',name:'Lotus Temple',addr:'Kalkaji, New Delhi',time:'차로 28분',price:'무료',open:'09:00–17:30',review:'연꽃 모양 바하이 사원. 입장 무료, 명상 공간.',stars:4.6},
+  {cat:'food',name:'Bukhara',addr:'ITC Maurya · Diplomatic Enclave',time:'차로 25분',price:'₹₹₹₹',open:'영업 중 · ~23:30',review:'북인도 화덕(탄두르) 요리의 정석. 달 부카라는 꼭.',stars:4.8},
+  {cat:'cafe',name:'Blue Tokai Coffee',addr:'Khan Market',time:'차로 20분',price:'₹₹',open:'영업 중 · ~21:00',review:'인도 스페셜티 커피 1세대. 콜드브루 추천.',stars:4.6},
+  {cat:'bar',name:'Soi 7 Brewpub',addr:'Cyber Hub · Gurgaon',time:'차로 18분',price:'₹₹₹',open:'영업 중 · ~01:00',review:'수제맥주 펍. 사이버허브 야경 보며 한 잔.',stars:4.3},
+  {cat:'shop',name:'Dilli Haat',addr:'INA',time:'차로 22분',price:'₹100',open:'10:30–22:00',review:'전국 수공예 직거래 시장. 흥정 필수, 기념품 천국.',stars:4.5},
+  {cat:'barber',name:'Truefitt & Hill',addr:'Khan Market',time:'차로 20분',price:'₹₹₹',open:'10:00–20:00',review:'영국 왕실 이발소 브랜드. 핫타월 면도 경험.',stars:4.7},
   {cat:'shop',name:'The Grand Venice Mall',addr:'Site 4, Greater Noida',price:'—',open:'11:00–23:00',review:'베네치아 운하 테마의 초대형 몰. 푸드코트·멀티플렉스·짚라인까지 있는 랜드마크.',stars:4.2},
   {cat:'shop',name:'Omaxe Connaught Place',addr:'Beta II, Greater Noida',price:'—',open:'11:00–22:00',review:'코노트 플레이스를 본뜬 대형 쇼핑몰. 글로벌 브랜드와 가족 엔터테인먼트.',stars:4.1},
   {cat:'sight',name:'Buddh International Circuit',addr:'Jaypee Greens Sports City, Greater Noida',price:'—',open:'이벤트 시 개방',review:'아시아 최초의 F1 서킷. 레이스·트랙데이 등 모터스포츠 명소.',stars:4.5},
@@ -942,46 +851,72 @@ const GN_PLACES=[
   {cat:'bar',name:'Gallontree',addr:'Pari Chowk, Greater Noida',price:'₹₹₹',open:'영업 중 · ~01:00',review:'파리 초크의 활기찬 바·다이닝. 멀티 퀴진과 바를 함께.',stars:4.2},
   {cat:'care',name:'Sharda Hospital',addr:'Knowledge Park III, Greater Noida',price:'—',open:'24시간',review:'그레이터 노이다 대형 종합병원. 응급·국제진료 운영.',stars:4.0},
 ];
-const NEW_GOODS=[
+const SEED_PRODUCTS=[
+  {name:'다즐링 홍차',desc:'향이 섬세한 퍼스트 플러시 추천. 봉인된 정품 확인.',shop:'Dilli Haat / 차 전문점',price:'350'},
+  {name:'파슈미나 숄',desc:'캐시미어 혼방 주의, 손으로 짠 것 확인.',shop:'Janpath Market',price:'2500'},
+  {name:'마살라 향신료 세트',desc:'가람 마살라·강황 인기. 밀봉 포장 요청.',shop:'Khari Baoli 시장',price:'400'},
+  {name:'블록프린트 면직물',desc:'천연염색 손날염. 식탁보·스카프로 좋음.',shop:'Dilli Haat',price:'600'},
   {name:'히말라야 립밤',desc:'천연 성분 립밤. 저렴하고 가벼워 선물용으로 인기.',shop:'약국·드러그스토어 / Himalaya 매장',price:'120'},
   {name:'파티스마트 (Himalaya PartySmart)',desc:'음주 전후 챙기는 허브 캡슐. 여행자 사이에서 유명한 숙취 대비템.',shop:'약국·드러그스토어',price:'150'},
   {name:'히말라야 넘 페이스워시',desc:'님(Neem) 성분 페이스워시. 트러블 케어로 스테디셀러.',shop:'약국·드러그스토어',price:'180'},
 ];
-async function ensureContentV2(){
-  if(await load('ncr:contentV2',false))return;
-  const pn=new Set(state.places.map(p=>p.name));
-  GN_PLACES.forEach(p=>{if(!pn.has(p.name))state.places.push(Object.assign({id:uid(),contact:'',time:'',photo:null},p));});
-  const gn=new Set(state.products.map(g=>g.name));
-  NEW_GOODS.forEach(g=>{if(!gn.has(g.name))state.products.push(Object.assign({id:uid(),photo:null},g));});
-  await save(KEYS.places,state.places);await save(KEYS.products,state.products);
-  await save('ncr:contentV2',true);
+const SEED_TIPS=[
+  {cat:'교통',title:'릭샤보다 Uber·Ola 앱',body:'오토릭샤는 미터를 잘 안 켜요. 앱으로 부르면 요금이 정해져 흥정 스트레스가 없습니다. 차량 번호 대조 필수.'},
+  {cat:'안전',title:'물은 무조건 생수',body:'수돗물·얼음 주의. 식당에서도 밀봉 생수(Bisleri) 확인하고 받으세요.'},
+  {cat:'통신·결제',title:'공항에서 유심 먼저',body:'Airtel·Jio 유심을 공항에서 개통. UPI가 안 되면 현금이 편할 때가 많아요.'},
+  {cat:'건강',title:'델리벨리 대비',body:'지사제·전해질 분말을 챙기고, 도착 첫 며칠은 익힌 음식 위주로.'},
+];
+async function seedCollection(key){
+  try{
+    if(key==='places'){
+      for(const p of SEED_PLACES){await fdb.collection(COL.places).add({ownerUid:myUid,createdAt:tsNow(),name:p.name,cat:p.cat,addr:p.addr||'',contact:'',time:p.time||'',price:p.price||'',open:p.open||'',review:p.review||'',stars:Number(p.stars)||0,photo:null});}
+    }else if(key==='products'){
+      for(const g of SEED_PRODUCTS){await fdb.collection(COL.products).add({ownerUid:myUid,createdAt:tsNow(),name:g.name,desc:g.desc||'',shop:g.shop||'',price:g.price||'',photo:null});}
+    }else{
+      for(const t of SEED_TIPS){await fdb.collection(COL.tips).add({ownerUid:myUid,createdAt:tsNow(),cat:t.cat||'기타',title:t.title,body:t.body||''});}
+    }
+  }catch(e){console.warn('seed',key,e);}
+}
+
+/* ============ Firestore 실시간 구독 ============ */
+const _seedTried={};
+async function maybeSeed(key,snap){
+  if(_seedTried[key]||snap.metadata.fromCache)return;
+  _seedTried[key]=true;
+  if(snap.size>0)return;
+  if(await load('ncr:seeded_'+key,false))return;
+  await save('ncr:seeded_'+key,true);
+  await seedCollection(key);
+}
+function bySeedOrder(a,b){return ((b.createdAt&&b.createdAt.seconds)||9e15)-((a.createdAt&&a.createdAt.seconds)||9e15);}
+function subscribe(){
+  const render={places:renderPlaces,products:renderGoods,tips:renderTips};
+  Object.keys(COL).forEach(key=>{
+    fdb.collection(COL[key]).onSnapshot(snap=>{
+      const arr=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+      arr.sort(bySeedOrder);
+      state[key]=arr;
+      render[key]();
+      maybeSeed(key,snap);
+    },err=>{console.warn('snapshot',key,err);});
+  });
 }
 
 /* ============ Init ============ */
-async function migrate(){
-  // 이전 데이터 호환: cat 'spot' → 'sight'
-  let changed=false;
-  state.places.forEach(p=>{if(p.cat==='spot'){p.cat='sight';changed=true;}});
-  if(changed)await save(KEYS.places,state.places);
-}
+let _subscribed=false;
 async function init(){
   buildNav();buildPlaceCats();buildTipCats();
-  const seeded=await load('ncr:seeded',false);
   state.rate=await load(KEYS.rate,15.7);
-  state.places=await load(KEYS.places,[]);
-  state.products=await load(KEYS.products,[]);
-  state.tips=await load(KEYS.tips,[]);
-  if(!seeded&&!state.places.length&&!state.products.length&&!state.tips.length){
-    seed();
-    await save(KEYS.places,state.places);await save(KEYS.products,state.products);
-    await save(KEYS.tips,state.tips);await save('ncr:seeded',true);
-  }
-  await migrate();
-  await ensureContentV2();
   renderRate();renderPlaces();renderGoods();renderTips();
-  updateLockIcon();
   switchTab('exchange');
   fetchLiveRate();
+  fbAuth.onAuthStateChanged(u=>{
+    if(!u)return;
+    myUid=u.uid;
+    if(!_subscribed){_subscribed=true;subscribe();}
+    else{renderPlaces();renderGoods();renderTips();}
+  });
+  fbAuth.signInAnonymously().catch(e=>{console.warn('auth',e);toast('서버 연결 실패 — 잠시 후 새로고침');});
 }
 init();
 </script>
