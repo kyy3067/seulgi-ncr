@@ -95,6 +95,8 @@ input,textarea{font-family:inherit;}
 }
 .chip.ico{padding-left:11px;}
 .chip.active{border-color:var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600;}
+.chip.reset{color:var(--subtext);}
+.chip.reset .msr{color:var(--subtext);}
 .chip-row{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 12px;}
 
 /* ===== Exchange ===== */
@@ -474,12 +476,18 @@ function renderRate(){
   convert();renderQuick();
 }
 function convert(){const v=parseFloat(inrInput.value)||0;krwOut.textContent=fmt(v*state.rate,0);}
-inrInput.addEventListener('input',()=>{inrInput.value=inrInput.value.replace(/[^0-9.]/g,'');convert();renderQuick();});
+inrInput.addEventListener('input',()=>{inrInput.value=inrInput.value.replace(/[^0-9.]/g,'');convert();});
 function renderQuick(){
   const box=document.getElementById('quickRow');
-  const amts=[100,500,1000,5000];const cur=parseFloat(inrInput.value)||0;
-  box.innerHTML=amts.map(a=>`<button class="chip${cur===a?' active':''}" data-a="${a}">₹${fmt(a)}</button>`).join('');
-  box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{inrInput.value=b.dataset.a;convert();renderQuick();}));
+  const amts=[100,500,1000,5000];
+  box.innerHTML=amts.map(a=>`<button class="chip" data-add="${a}">+₹${fmt(a)}</button>`).join('')
+    +`<button class="chip ico reset" data-reset="1">${icon('restart_alt','b',16)}초기화</button>`;
+  box.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
+    const cur=parseFloat(inrInput.value)||0;
+    inrInput.value=String(Math.round((cur+(+b.dataset.add))*100)/100);
+    convert();
+  }));
+  box.querySelector('[data-reset]').addEventListener('click',()=>{inrInput.value='';convert();inrInput.focus();});
 }
 ratePin.addEventListener('click',()=>{
   if(ratePin.dataset.editing)return;
