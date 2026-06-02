@@ -267,6 +267,21 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 .btn-cancel{flex:1; height:50px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
 .btn-save{flex:1.6; height:50px; border-radius:var(--radius-sm); border:none; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
 
+/* ===== 비밀번호(잠금) ===== */
+.lock-btn{border:none; background:transparent; cursor:pointer; color:var(--subtext); display:flex; align-items:center; padding:6px; border-radius:8px; flex-shrink:0;}
+.lock-btn:active{background:var(--surface2);}
+.lock-btn .msr.fill{color:var(--accent);}
+.pin-overlay{position:fixed; inset:0; z-index:120; background:rgba(15,16,25,.45); display:none; align-items:center; justify-content:center; padding:24px; animation:fadeIn .2s ease;}
+.pin-overlay.open{display:flex;}
+.pin-box{width:100%; max-width:340px; background:var(--surface); border-radius:20px; padding:24px 22px; box-shadow:0 16px 48px rgba(0,0,0,.18); text-align:center;}
+.pin-icon{width:52px; height:52px; border-radius:14px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; margin:0 auto 14px;}
+.pin-icon .msr{font-size:26px;}
+.pin-box h3{margin:0 0 6px; font-size:18px; font-weight:800; color:var(--text);}
+.pin-sub{margin:0 0 16px; font-size:13px; color:var(--subtext); line-height:1.5;}
+.pin-input{width:100%; box-sizing:border-box; height:46px; padding:0 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); font-family:inherit; font-size:16px; color:var(--text); outline:none; text-align:center; margin-bottom:10px;}
+.pin-input:focus{border-color:var(--accent); background:var(--surface);}
+.pin-actions{display:flex; gap:10px; margin-top:6px;}
+
 /* ===== Toast ===== */
 .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); white-space:nowrap; pointer-events:none;}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
@@ -318,6 +333,7 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
     <div class="brand-logo"><span class="msr fill" style="font-size:19px">spa</span></div>
     <div class="brand-name">슬기로운 NCR</div>
     <div class="brand-loc"><span class="msr fill" style="font-size:16px">location_on</span>Delhi NCR</div>
+    <button id="lockBtn" class="lock-btn" title="수정·삭제 비밀번호"><span class="msr" style="font-size:18px">lock_open</span></button>
   </header>
 
   <main class="content">
@@ -413,6 +429,20 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
     <div class="sheet-actions">
       <button class="btn-cancel" id="sheetCancel">취소</button>
       <button class="btn-save" id="sheetSave">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-icon"><span class="msr fill">lock</span></div>
+    <h3 id="pinTitle">비밀번호 입력</h3>
+    <p class="pin-sub" id="pinSub"></p>
+    <input id="pinInput" class="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호">
+    <input id="pinInput2" class="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 확인" style="display:none">
+    <div class="pin-actions">
+      <button class="btn-cancel" id="pinCancel">취소</button>
+      <button class="btn-save" id="pinOk">확인</button>
     </div>
   </div>
 </div>
@@ -621,8 +651,8 @@ function renderPlaces(){
     return;
   }
   list.innerHTML=arr.map(placeCardHTML).join('');
-  list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',()=>openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace))));
-  list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',()=>delPlace(b.dataset.delPlace)));
+  list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace));}));
+  list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())delPlace(b.dataset.delPlace);}));
 }
 function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;state.places=state.places.filter(p=>p.id!==id);save(KEYS.places,state.places);renderPlaces();toast('삭제되었어요');}
 
@@ -649,8 +679,8 @@ function renderGoods(){
     return;
   }
   list.innerHTML=state.products.map(goodsCardHTML).join('');
-  list.querySelectorAll('[data-edit-good]').forEach(b=>b.addEventListener('click',()=>openSheet('goods',state.products.find(x=>x.id===b.dataset.editGood))));
-  list.querySelectorAll('[data-del-good]').forEach(b=>b.addEventListener('click',()=>delGood(b.dataset.delGood)));
+  list.querySelectorAll('[data-edit-good]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())openSheet('goods',state.products.find(x=>x.id===b.dataset.editGood));}));
+  list.querySelectorAll('[data-del-good]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())delGood(b.dataset.delGood);}));
 }
 function delGood(id){if(!confirm('이 특산물을 삭제할까요?'))return;state.products=state.products.filter(p=>p.id!==id);save(KEYS.products,state.products);renderGoods();toast('삭제되었어요');}
 
@@ -687,8 +717,8 @@ function renderTips(){
     return;
   }
   list.innerHTML=arr.map(tipCardHTML).join('');
-  list.querySelectorAll('[data-edit-tip]').forEach(b=>b.addEventListener('click',()=>openSheet('tips',state.tips.find(x=>x.id===b.dataset.editTip))));
-  list.querySelectorAll('[data-del-tip]').forEach(b=>b.addEventListener('click',()=>delTip(b.dataset.delTip)));
+  list.querySelectorAll('[data-edit-tip]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())openSheet('tips',state.tips.find(x=>x.id===b.dataset.editTip));}));
+  list.querySelectorAll('[data-del-tip]').forEach(b=>b.addEventListener('click',async()=>{if(await requireAuth())delTip(b.dataset.delTip);}));
 }
 function delTip(id){if(!confirm('이 팁을 삭제할까요?'))return;state.tips=state.tips.filter(t=>t.id!==id);save(KEYS.tips,state.tips);renderTips();toast('삭제되었어요');}
 
@@ -800,6 +830,71 @@ function upsert(stateKey,storeKey,obj,rerender){
   save(storeKey,arr);rerender();closeSheet();toast('저장되었어요');
 }
 
+/* ============ 수정·삭제 비밀번호 ============ */
+let _unlocked=false;
+async function sha(s){
+  try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}}catch(e){}
+  let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return 'f'+h.toString(16);
+}
+function askPin(opts={}){
+  return new Promise(resolve=>{
+    const ov=document.getElementById('pinOverlay');
+    document.getElementById('pinTitle').textContent=opts.title||'비밀번호 입력';
+    const sub=document.getElementById('pinSub');sub.textContent=opts.sub||'';sub.style.display=opts.sub?'block':'none';
+    const i1=document.getElementById('pinInput'),i2=document.getElementById('pinInput2');
+    i1.value='';i2.value='';i2.style.display=opts.confirm?'block':'none';
+    document.getElementById('pinOk').textContent=opts.okLabel||'확인';
+    ov.classList.add('open');document.body.style.overflow='hidden';
+    setTimeout(()=>i1.focus(),50);
+    const ok=document.getElementById('pinOk'),cancel=document.getElementById('pinCancel');
+    function cleanup(val){ov.classList.remove('open');document.body.style.overflow='';ok.onclick=cancel.onclick=ov.onclick=i1.onkeydown=i2.onkeydown=null;resolve(val);}
+    function onOk(){
+      const v=i1.value;
+      if(opts.confirm&&v!==i2.value){toast('비밀번호가 일치하지 않아요');return;}
+      if(!opts.allowEmpty&&v===''){toast('비밀번호를 입력하세요');return;}
+      cleanup(v);
+    }
+    ok.onclick=onOk;cancel.onclick=()=>cleanup(null);
+    ov.onclick=e=>{if(e.target===ov)cleanup(null);};
+    i1.onkeydown=i2.onkeydown=e=>{if(e.key==='Enter')onOk();if(e.key==='Escape')cleanup(null);};
+  });
+}
+async function requireAuth(){
+  if(_unlocked)return true;
+  const hash=await load('ncr:pinHash',null);
+  if(!hash){
+    const p=await askPin({title:'수정·삭제 비밀번호 설정',sub:'앞으로 수정·삭제하려면 이 비밀번호가 필요해요.',confirm:true,okLabel:'설정'});
+    if(p==null)return false;
+    await save('ncr:pinHash',await sha(p));_unlocked=true;updateLockIcon();toast('비밀번호가 설정됐어요');return true;
+  }
+  const p=await askPin({title:'비밀번호 입력',sub:'수정·삭제하려면 비밀번호를 입력하세요.'});
+  if(p==null)return false;
+  if(await sha(p)===hash){_unlocked=true;return true;}
+  toast('비밀번호가 일치하지 않아요');return false;
+}
+async function managePin(){
+  const hash=await load('ncr:pinHash',null);
+  if(!hash){
+    const p=await askPin({title:'수정·삭제 비밀번호 설정',sub:'수정·삭제를 보호할 비밀번호를 정하세요.',confirm:true,okLabel:'설정'});
+    if(p!=null){await save('ncr:pinHash',await sha(p));_unlocked=true;updateLockIcon();toast('비밀번호가 설정됐어요');}
+    return;
+  }
+  const cur=await askPin({title:'현재 비밀번호 입력',sub:'변경·해제하려면 현재 비밀번호가 필요해요.'});
+  if(cur==null)return;
+  if(await sha(cur)!==hash){toast('비밀번호가 일치하지 않아요');return;}
+  const np=await askPin({title:'새 비밀번호',sub:'비워두고 저장하면 비밀번호가 해제됩니다.',confirm:true,allowEmpty:true,okLabel:'저장'});
+  if(np==null)return;
+  if(np===''){await save('ncr:pinHash',null);_unlocked=true;updateLockIcon();toast('비밀번호가 해제됐어요');}
+  else{await save('ncr:pinHash',await sha(np));_unlocked=true;updateLockIcon();toast('비밀번호가 변경됐어요');}
+}
+async function updateLockIcon(){
+  const has=!!(await load('ncr:pinHash',null));
+  const el=document.getElementById('lockBtn');if(!el)return;
+  const m=el.querySelector('.msr');m.textContent=has?'lock':'lock_open';m.className='msr'+(has?' fill':'');
+  el.title=has?'수정·삭제 잠금 (설정됨) · 변경/해제':'수정·삭제 비밀번호 설정';
+}
+document.getElementById('lockBtn').addEventListener('click',managePin);
+
 /* ============ Install (PWA) ============ */
 let deferredPrompt=null;
 function isStandalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
@@ -884,6 +979,7 @@ async function init(){
   await migrate();
   await ensureContentV2();
   renderRate();renderPlaces();renderGoods();renderTips();
+  updateLockIcon();
   switchTab('exchange');
   fetchLiveRate();
 }
