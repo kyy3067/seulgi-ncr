@@ -103,7 +103,7 @@ input,textarea{font-family:inherit;}
 .chip-row{display:flex; gap:8px; overflow-x:auto; padding:10px 16px 12px;}
 
 /* ===== Exchange ===== */
-.ex-wrap{padding:4px 16px 24px; display:flex; flex-direction:column; flex:1;}
+.ex-wrap{padding:28px 16px 24px; display:flex; flex-direction:column; flex:1;}
 .ex-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:8px 4px 14px;}
 .ex-head h1{margin:0; font-size:26px; font-weight:var(--head-weight); letter-spacing:-.02em; color:var(--text);}
 .ex-head p{margin:4px 0 0; font-size:13.5px; color:var(--subtext);}
@@ -389,8 +389,8 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 
         <div class="card">
           <div class="money">
-            <div class="money-top"><span class="money-label">인도 루피</span><span class="money-code">INR</span></div>
-            <div class="money-row"><span class="money-sym">₹</span>
+            <div class="money-top"><span class="money-label" id="fromLabel">인도 루피</span><span class="money-code" id="fromCode">INR</span></div>
+            <div class="money-row"><span class="money-sym" id="fromSym">₹</span>
               <input id="inrInput" class="money-input" inputmode="decimal" value="1,000" placeholder="0"></div>
           </div>
           <div class="rate-divider">
@@ -402,8 +402,8 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
             <div class="line"></div>
           </div>
           <div class="money">
-            <div class="money-top"><span class="money-label">대한민국 원</span><span class="money-code">KRW</span></div>
-            <div class="money-row"><span class="money-sym accent">₩</span>
+            <div class="money-top"><span class="money-label" id="toLabel">대한민국 원</span><span class="money-code" id="toCode">KRW</span></div>
+            <div class="money-row"><span class="money-sym accent" id="toSym">₩</span>
               <span id="krwOut" class="money-out">0</span></div>
           </div>
         </div>
@@ -418,8 +418,6 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 
         <div class="card ex-tip-card">
           <div class="ex-tip-head"><span class="msr fill" style="font-size:18px">lightbulb</span><span>환전 꿀팁</span></div>
-          <div class="ex-tip-row"><span class="ex-tip-dot"></span><span>공항 환전소는 환율이 가장 나빠요. 시내 ATM 인출이나 Wise·트래블카드를 활용하세요.</span></div>
-          <div class="ex-tip-row"><span class="ex-tip-dot"></span><span>큰 금액일수록 사설 환전소에서 흥정 여지가 있어요.</span></div>
           <div class="ex-tip-row"><span class="ex-tip-dot"></span><span>받은 지폐는 위조·훼손 여부를 꼭 확인하세요.</span></div>
         </div>
       </div>
@@ -617,8 +615,19 @@ function switchTab(tab){
 /* ============ Exchange ============ */
 const inrInput=document.getElementById('inrInput');
 const krwOut=document.getElementById('krwOut');
+let exSwap=false; // false: 루피→원, true: 원→루피 (가운데 버튼으로 토글)
+function applyDir(){
+  const krwFirst=exSwap;
+  document.getElementById('fromLabel').textContent=krwFirst?'대한민국 원':'인도 루피';
+  document.getElementById('fromCode').textContent=krwFirst?'KRW':'INR';
+  document.getElementById('fromSym').textContent=krwFirst?'₩':'₹';
+  document.getElementById('toLabel').textContent=krwFirst?'인도 루피':'대한민국 원';
+  document.getElementById('toCode').textContent=krwFirst?'INR':'KRW';
+  document.getElementById('toSym').textContent=krwFirst?'₹':'₩';
+  document.getElementById('ratePinText').textContent=krwFirst?('₩100 = ₹'+fmt(100/state.rate,2)):('₹1 = '+fmt(state.rate,2)+'원');
+}
 function renderRate(){
-  document.getElementById('ratePinText').textContent='₹1 = '+fmt(state.rate,2)+'원';
+  applyDir();
   convert();renderQuick();
 }
 function inrNum(){return parseFloat(inrInput.value.replace(/,/g,''))||0;}
@@ -630,7 +639,7 @@ function groupNum(raw){
   intp=intp.replace(/\B(?=(\d{3})+(?!\d))/g,',');
   return dot>=0?(intp||'0')+'.'+dec:intp;
 }
-function convert(){krwOut.textContent=fmt(inrNum()*state.rate,0);}
+function convert(){const v=inrNum();const out=exSwap?(v/state.rate):(v*state.rate);krwOut.textContent=fmt(out,exSwap?2:0);}
 inrInput.addEventListener('input',()=>{
   const old=inrInput.value, caret=inrInput.selectionEnd||0;
   let dBefore=0;for(let k=0;k<caret;k++){if(/[\d.]/.test(old[k]))dBefore++;}
@@ -642,13 +651,22 @@ inrInput.addEventListener('input',()=>{
 document.getElementById('resetBtn').addEventListener('click',()=>{inrInput.value='';convert();inrInput.focus();});
 function renderQuick(){
   const box=document.getElementById('quickRow');
-  const amts=[100,500,1000,5000];
-  box.innerHTML=amts.map(a=>`<button class="chip" data-add="${a}">+₹${fmt(a)}</button>`).join('');
+  const amts=[10,100,500,1000,5000,10000];
+  const sym=exSwap?'₩':'₹';
+  box.innerHTML=amts.map(a=>`<button class="chip" data-add="${a}">+${sym}${fmt(a)}</button>`).join('');
   box.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
     inrInput.value=groupNum(String(Math.round((inrNum()+(+b.dataset.add))*100)/100));
     convert();
   }));
 }
+/* 가운데 환율 버튼: 루피↔원 방향 전환 (현재 결과값을 새 입력값으로 이동) */
+document.getElementById('ratePin').addEventListener('click',()=>{
+  const moved=exSwap?(inrNum()/state.rate):(inrNum()*state.rate);
+  exSwap=!exSwap;
+  applyDir();
+  inrInput.value=groupNum(String(Math.round(moved*100)/100));
+  convert();renderQuick();
+});
 /* ============ 실시간 환율 ============ */
 const FX_API='https://open.er-api.com/v6/latest/INR';
 const FX_BACKUP='https://api.frankfurter.app/latest?from=INR&to=KRW';
@@ -664,7 +682,7 @@ async function fetchLiveRate(manual){
     await save(KEYS.rate,state.rate);
     const now=Date.now();await save('ncr:rateUpdated',now);
     renderRate();renderGoods();
-    status.textContent='실시간 환율 · '+fmtUpdated(now)+' 기준 · 오프라인이면 마지막 값 사용';
+    status.textContent='실시간 환율 · '+fmtUpdated(now)+' 기준';
     if(manual)toast('실시간 환율을 불러왔어요');
     return true;
   }
