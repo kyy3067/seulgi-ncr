@@ -1208,9 +1208,26 @@ document.getElementById('sheetSave').addEventListener('click',async()=>{
 let deferredPrompt=null;
 function isStandalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 const installBtn=document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(!isStandalone())installBtn.style.display='flex';});
-window.addEventListener('appinstalled',()=>{installBtn.style.display='none';deferredPrompt=null;toast('앱이 설치되었어요');});
-installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice;}catch(e){}deferredPrompt=null;installBtn.style.display='none';});
+// 앱으로 실행 중(standalone)이 아니면 설치 버튼을 항상 노출 — beforeinstallprompt 미발생 환경에서도 안내 가능
+function refreshInstallUI(){installBtn.style.display=isStandalone()?'none':'flex';}
+refreshInstallUI();
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;refreshInstallUI();});
+window.addEventListener('appinstalled',()=>{deferredPrompt=null;installBtn.style.display='none';toast('앱이 설치되었어요');});
+installBtn.addEventListener('click',async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    try{await deferredPrompt.userChoice;}catch(e){}
+    deferredPrompt=null;
+    return;
+  }
+  // 네이티브 설치 창이 없는 환경 → 수동 설치 방법 안내
+  const ua=navigator.userAgent||'';
+  let msg;
+  if(/iphone|ipad|ipod/i.test(ua)) msg='사파리 하단의 공유 버튼(□↑)을 누른 뒤 "홈 화면에 추가"를 선택하면 앱처럼 설치돼요.';
+  else if(/android/i.test(ua)) msg='브라우저 메뉴(⋮)에서 "앱 설치" 또는 "홈 화면에 추가"를 선택하세요.';
+  else msg='주소창 오른쪽의 설치 아이콘, 또는 브라우저 메뉴에서 "앱 설치 / 홈 화면에 추가"를 선택하세요.\n(크롬·엣지에서 지원)';
+  alert(msg);
+});
 (function(){const ua=navigator.userAgent||'';if(/iphone|ipad|ipod/i.test(ua)&&!isStandalone()){document.getElementById('iosNote').style.display='block';}})();
 
 /* ============ 관리자 모드 ============ */
