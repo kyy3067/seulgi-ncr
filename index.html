@@ -337,7 +337,7 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
           <div class="money">
             <div class="money-top"><span class="money-label">인도 루피</span><span class="money-code">INR</span></div>
             <div class="money-row"><span class="money-sym">₹</span>
-              <input id="inrInput" class="money-input" inputmode="decimal" value="1000" placeholder="0"></div>
+              <input id="inrInput" class="money-input" inputmode="decimal" value="1,000" placeholder="0"></div>
           </div>
           <div class="rate-divider">
             <div class="line"></div>
@@ -538,16 +538,31 @@ function renderRate(){
   document.getElementById('ratePinText').textContent='₹1 = '+fmt(state.rate,2)+'원';
   convert();renderQuick();
 }
-function convert(){const v=parseFloat(inrInput.value)||0;krwOut.textContent=fmt(v*state.rate,0);}
-inrInput.addEventListener('input',()=>{inrInput.value=inrInput.value.replace(/[^0-9.]/g,'');convert();});
+function inrNum(){return parseFloat(inrInput.value.replace(/,/g,''))||0;}
+function groupNum(raw){
+  raw=String(raw).replace(/,/g,'');
+  const dot=raw.indexOf('.');
+  let intp=(dot>=0?raw.slice(0,dot):raw).replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+  const dec=dot>=0?raw.slice(dot+1).replace(/\D/g,''):'';
+  intp=intp.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  return dot>=0?(intp||'0')+'.'+dec:intp;
+}
+function convert(){krwOut.textContent=fmt(inrNum()*state.rate,0);}
+inrInput.addEventListener('input',()=>{
+  const old=inrInput.value, caret=inrInput.selectionEnd||0;
+  let dBefore=0;for(let k=0;k<caret;k++){if(/[\d.]/.test(old[k]))dBefore++;}
+  const f=groupNum(old);inrInput.value=f;
+  let i=0,c=0;while(i<f.length&&c<dBefore){if(/[\d.]/.test(f[i]))c++;i++;}
+  try{inrInput.setSelectionRange(i,i);}catch(e){}
+  convert();
+});
 document.getElementById('resetBtn').addEventListener('click',()=>{inrInput.value='';convert();inrInput.focus();});
 function renderQuick(){
   const box=document.getElementById('quickRow');
   const amts=[100,500,1000,5000];
   box.innerHTML=amts.map(a=>`<button class="chip" data-add="${a}">+₹${fmt(a)}</button>`).join('');
   box.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
-    const cur=parseFloat(inrInput.value)||0;
-    inrInput.value=String(Math.round((cur+(+b.dataset.add))*100)/100);
+    inrInput.value=groupNum(String(Math.round((inrNum()+(+b.dataset.add))*100)/100));
     convert();
   }));
 }
