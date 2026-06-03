@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>슬기로운 NCR</title>
+<title>슬기로운 NCR 생활</title>
 <meta name="theme-color" content="#f4f5f8">
 <meta name="description" content="델리 수도권(NCR) 여행·생활 도우미">
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="슬기로운 NCR">
+<meta name="apple-mobile-web-app-title" content="슬기로운 NCR 생활">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,7 +71,9 @@ input,textarea{font-family:inherit;}
   width:30px; height:30px; border-radius:9px; background:var(--accent-soft);
   display:flex; align-items:center; justify-content:center; color:var(--accent);
 }
-.brand-name{font-size:16px; font-weight:800; letter-spacing:-.02em; flex:1;}
+.brand-title{flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center;}
+.brand-name{font-size:16px; font-weight:800; letter-spacing:-.02em; line-height:1.15;}
+.brand-sub{font-size:11px; font-weight:600; color:#a8adbd; letter-spacing:.01em; line-height:1.2; margin-top:1px;}
 .brand-loc{display:flex; align-items:center; gap:4px; font-size:12.5px; color:var(--subtext); font-weight:600;}
 .brand-loc .msr{color:var(--accent);}
 
@@ -346,7 +348,10 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 <div class="app">
   <header class="brandbar">
     <div class="brand-logo" id="brandLogo"><span class="msr fill" style="font-size:19px">spa</span></div>
-    <div class="brand-name">슬기로운 NCR</div>
+    <div class="brand-title">
+      <div class="brand-name">슬기로운 NCR 생활</div>
+      <div class="brand-sub">dreamtech &amp; Samsung</div>
+    </div>
     <div class="brand-loc"><span class="msr fill" style="font-size:16px">location_on</span>Delhi NCR</div>
   </header>
 
@@ -497,6 +502,8 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 function mapsSearch(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q);}
 function icon(name,cls,size){return `<span class="msr${cls?' '+cls:''}"${size?` style="font-size:${size}px"`:''}>${name}</span>`;}
+/* 이미지 로드 실패(오프라인·404) 시 기존 '사진' 플레이스홀더로 복귀 */
+function imgErr(img){try{const d=document.createElement('div');d.className='ph '+img.className;d.innerHTML='<span>사진</span>';img.replaceWith(d);}catch(e){}}
 
 /* ============ Image resize ============ */
 function resizeImage(file,max=800,quality=.6){
@@ -656,7 +663,8 @@ function placeCardHTML(p){
   const hasGeo=(typeof p.lat==='number'&&typeof p.lng==='number');
   const mapUrl=hasGeo?('https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng):mapsSearch(q);
   const dirUrl=hasGeo?('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng):mapsDir(q);
-  const photo=p.photo?`<img class="pcard-photo" src="${esc(p.photo)}" alt="">`:`<div class="ph pcard-photo"><span>사진</span></div>`;
+  const pPhoto=p.photo||SEED_PHOTO_PLACE[p.name]||'';
+  const photo=pPhoto?`<img class="pcard-photo" src="${esc(pPhoto)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="imgErr(this)">`:`<div class="ph pcard-photo"><span>사진</span></div>`;
   const rating=(p.stars&&Number(p.stars)>0)?`<span class="stars">${icon('star','fill',14)}<b>${Number(p.stars).toFixed(1)}</b></span>`:'';
   const price=p.price?`<span class="pr">${esc(p.price)}</span>`:'';
   const mins=p.time?`<span class="mins">${icon('directions_car','',14)}${esc(p.time)}</span>`:'';
@@ -707,7 +715,8 @@ function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.c
 /* ============ Goods ============ */
 function goodsCardHTML(g){
   const own=isAdminMode||(g.ownerUid&&g.ownerUid===myUid);
-  const photo=g.photo?`<img class="gcard-photo" src="${esc(g.photo)}" alt="">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
+  const gPhoto=g.photo||SEED_PHOTO_PRODUCT[g.name]||'';
+  const photo=gPhoto?`<img class="gcard-photo" src="${esc(gPhoto)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="imgErr(this)">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
   const priceNum=parseFloat(g.price);
   const krw=(priceNum>0)?` <span class="krw">(≈ ${fmt(Math.round(priceNum*state.rate))}원)</span>`:'';
   const price=g.price?`<div class="gcard-price">약 ₹${esc(g.price)}${krw}</div>`:'';
@@ -1089,6 +1098,36 @@ const SEED_TIPS=[
   {cat:'통신·결제',title:'공항에서 유심 먼저',body:'Airtel·Jio 유심을 공항에서 개통. UPI가 안 되면 현금이 편할 때가 많아요.'},
   {cat:'건강',title:'델리벨리 대비',body:'지사제·전해질 분말을 챙기고, 도착 첫 며칠은 익힌 음식 위주로.'},
 ];
+/* ====== 시드 항목 기본 대표 이미지 (Wikimedia Commons · 실제 매장 사진 아님) ======
+   이름이 일치하고 사용자 사진(photo)이 없을 때만 카드에 폴백 표시. DB엔 저장하지 않음 */
+const SEED_PHOTO_PLACE={
+  'Lotus Temple':'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/LotusDelhi.jpg/330px-LotusDelhi.jpg',
+  'Bukhara':'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Chickentandoori.jpg/330px-Chickentandoori.jpg',
+  'Blue Tokai Coffee':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Caffe_Latte_at_Pulse_Cafe.jpg/330px-Caffe_Latte_at_Pulse_Cafe.jpg',
+  'Soi 7 Brewpub':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Bitburger_Glass.JPG/330px-Bitburger_Glass.JPG',
+  'Dilli Haat':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Dilli_Haat.jpg/330px-Dilli_Haat.jpg',
+  'Truefitt & Hill':'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Iranian_barber.jpg/330px-Iranian_barber.jpg',
+  'The Grand Venice Mall':'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/2018_Mall_of_America_01.jpg/330px-2018_Mall_of_America_01.jpg',
+  'Omaxe Connaught Place':'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Skyline_at_Rajiv_Chowk.JPG/330px-Skyline_at_Rajiv_Chowk.JPG',
+  'Buddh International Circuit':'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/2010_Malaysian_GP_opening_lap.jpg/330px-2010_Malaysian_GP_opening_lap.jpg',
+  'Surajpur Bird Sanctuary':'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/P-Stork-Sandeep.jpg/330px-P-Stork-Sandeep.jpg',
+  'Barbeque Nation':'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Barbecued_meats.jpg/330px-Barbecued_meats.jpg',
+  'Cafe Delhi Heights':'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/RedDot_Burger.jpg/330px-RedDot_Burger.jpg',
+  'Wat-a-Burger':'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cheeseburger.jpg/330px-Cheeseburger.jpg',
+  'Uncle Frogs':'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Desserts.jpg/330px-Desserts.jpg',
+  'Noidawery':'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Fuller%27s_India_pale_ale.jpg/330px-Fuller%27s_India_pale_ale.jpg',
+  'Gallontree':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/15-09-26-RalfR-WLC-0084.jpg/330px-15-09-26-RalfR-WLC-0084.jpg',
+  'Sharda Hospital':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Hospital-de-Bellvitge.jpg/330px-Hospital-de-Bellvitge.jpg',
+};
+const SEED_PHOTO_PRODUCT={
+  '다즐링 홍차':'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Darjeeling%2C_India%2C_Darjeeling_tea_in_variety%2C_Black_tea.jpg/330px-Darjeeling%2C_India%2C_Darjeeling_tea_in_variety%2C_Black_tea.jpg',
+  '파슈미나 숄':'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Kaschmirschal_1.jpg/330px-Kaschmirschal_1.jpg',
+  '마살라 향신료 세트':'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Garammasalaphoto.jpg/330px-Garammasalaphoto.jpg',
+  '블록프린트 면직물':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Woman_doing_Block_Printing_at_Bagru_village%2C_Jaipur%2C_India.jpg/330px-Woman_doing_Block_Printing_at_Bagru_village%2C_Jaipur%2C_India.jpg',
+  '히말라야 립밤':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Homemade_lip_balm.jpg/330px-Homemade_lip_balm.jpg',
+  '파티스마트 (Himalaya PartySmart)':'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/A_course_of_green_cefalexin_pills.jpg/330px-A_course_of_green_cefalexin_pills.jpg',
+  '히말라야 넘 페이스워시':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Neem_Tree_in_Rajasthan%2C_India.jpg/330px-Neem_Tree_in_Rajasthan%2C_India.jpg',
+};
 async function seedCollection(key){
   try{
     if(key==='places'){

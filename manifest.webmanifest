@@ -1,6 +1,6 @@
 {
-  "name": "슬기로운 NCR",
-  "short_name": "슬기로운NCR",
+  "name": "슬기로운 NCR 생활",
+  "short_name": "슬기로운NCR생활",
   "description": "델리 수도권(NCR) 여행·생활 도우미 — 환율, 맛집·명소, 특산물, 팁",
   "start_url": "./",
   "scope": "./",
