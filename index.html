@@ -517,6 +517,8 @@ let toastT;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1900);}
 function mapsSearch(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q);}
+/* 주소칸에 붙여넣은 구글맵 링크(주소/공유링크) 감지 → '지도/길찾기'가 그 위치로 바로 열리게 */
+function gmapUrl(s){s=(s||'').trim();return (/^https?:\/\//i.test(s)&&/(google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(s))?s:'';}
 function icon(name,cls,size){return `<span class="msr${cls?' '+cls:''}"${size?` style="font-size:${size}px"`:''}>${name}</span>`;}
 /* 이미지 로드 실패(오프라인·404) 시 기존 '사진' 플레이스홀더로 복귀 */
 function imgErr(img){try{const d=document.createElement('div');d.className='ph '+img.className;d.innerHTML='<span>사진</span>';img.replaceWith(d);}catch(e){}}
@@ -689,10 +691,11 @@ placeSearch.addEventListener('input',()=>{placeQuery=placeSearch.value;document.
 document.getElementById('placeSearchClr').addEventListener('click',()=>{placeSearch.value='';placeQuery='';document.getElementById('placeSearchClr').style.display='none';renderPlaces();});
 function placeCardHTML(p){
   const cat=CAT_MAP[p.cat]||CAT_MAP.food;
+  const gUrl=gmapUrl(p.addr);
   const q=(p.name+' '+(p.addr||'')).trim();
   const hasGeo=(typeof p.lat==='number'&&typeof p.lng==='number');
-  const mapUrl=hasGeo?('https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng):mapsSearch(q);
-  const dirUrl=hasGeo?('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng):mapsDir(q);
+  const mapUrl=gUrl||(hasGeo?('https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng):mapsSearch(q));
+  const dirUrl=gUrl||(hasGeo?('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng):mapsDir(q));
   const pImgs=parsePhotos(p.photo);
   const pCover=pImgs[0]||SEED_PHOTO_PLACE[p.name]||'';
   const pBadge=pImgs.length>1?`<span class="photo-badge">${icon('photo_library','',13)}${pImgs.length}</span>`:'';
@@ -713,7 +716,7 @@ function placeCardHTML(p){
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div style="min-width:0">
           <div class="pcard-name">${esc(p.name)}</div>
-          <div class="pcard-sub">${icon(cat.icon,'b',14)}<span>${esc(cat.label)}</span><span style="opacity:.5">·</span><span class="area">${esc(p.addr||'위치 미정')}</span></div>
+          <div class="pcard-sub">${icon(cat.icon,'b',14)}<span>${esc(cat.label)}</span><span style="opacity:.5">·</span><span class="area">${gUrl?'📍 구글맵 위치':esc(p.addr||'위치 미정')}</span></div>
         </div>
       </div>
       ${meta}${review}
@@ -864,11 +867,12 @@ function openSheet(tab,item){
       <label class="field"><span class="lbl">구분</span><div class="sheet-chips" id="catChips">${chipsHTML(PLACE_CATS.filter(c=>c.id!=='all'),sheetCat,true)}</div></label>
       <label class="field"><span class="lbl">이름<span class="req"> *</span></span><input class="inp" id="f_name" placeholder="예: Bukhara" value="${esc(item?item.name:'')}"></label>
       <label class="field"><span class="lbl">별점</span><div class="star-pick" id="starPick">${[1,2,3,4,5].map(n=>`<button type="button" data-star="${n}" class="${n<=sheetStars?'on':''}">${icon('star','fill',28)}</button>`).join('')}</div></label>
-      <div class="field"><span class="lbl">주소 / 위치</span>
+      <div class="field"><span class="lbl">주소 / 위치 <span style="font-weight:500;color:var(--subtext)">· 구글맵 링크 붙여넣기 가능</span></span>
         <div class="map-search">
-          <input class="inp" id="f_addr" placeholder="주소를 직접 입력하세요 (지도 없이 저장 OK)" value="${esc(item?item.addr:'')}">
+          <input class="inp" id="f_addr" placeholder="주소 입력 또는 구글맵 링크 붙여넣기" value="${esc(item?item.addr:'')}">
           <button type="button" class="btn-geo" id="f_addrGeo">${icon('travel_explore','',18)}지도표시</button>
         </div>
+        <div class="pick-hint" id="f_addrHint"></div>
       </div>
       <div class="field">
         <span class="lbl">지도에서 위치 지정 (선택) <span style="font-weight:500;color:var(--subtext)">· 찍으면 주소 자동 추천</span></span>
@@ -1012,11 +1016,15 @@ async function geoSearch(q){
 function bindAddrGeo(){
   const b=document.getElementById('f_addrGeo');
   if(b)b.addEventListener('click',geoFromAddr);
+  const a=document.getElementById('f_addr'), h=document.getElementById('f_addrHint');
+  if(a&&h){const upd=()=>{h.innerHTML=gmapUrl(a.value)?`${icon('check_circle','fill',14)}구글맵 링크 인식됨 · 카드의 ‘지도/길찾기’가 이 위치로 바로 열려요`:'';};a.addEventListener('input',upd);upd();}
 }
 async function geoFromAddr(){
   const addrEl=document.getElementById('f_addr');
   const q=(addrEl?addrEl.value:'').trim();
   if(!q){toast('먼저 주소를 입력하세요');return;}
+  const g=gmapUrl(q);
+  if(g){window.open(g,'_blank','noopener');toast('구글맵 링크를 열었어요 — 위치를 확인하세요');return;}
   if(typeof L==='undefined'||!pickMap){toast('지도 없이도 주소 그대로 저장돼요');return;}
   toast('주소로 위치 찾는 중…');
   try{
