@@ -140,8 +140,9 @@ input,textarea{font-family:inherit;}
 }
 .rate-pin .msr{color:var(--accent);}
 .rate-pin input{width:54px; border:none; outline:none; background:transparent; font-family:inherit; font-size:13px; font-weight:700; color:var(--accent); text-align:right;}
-.quick-row{display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:2px;}
-.rate-status{display:flex; align-items:center; gap:8px; margin-top:14px; padding:0 4px;}
+.quick-row{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px;}
+.quick-row .chip{justify-content:center; padding-left:8px; padding-right:8px;}
+.rate-status{display:flex; align-items:center; gap:8px; margin-top:18px; padding:0 4px;}
 .rate-status .msr{color:var(--subtext);}
 .rate-status .txt{font-size:12.5px; color:var(--subtext); flex:1;}
 .rate-refresh{display:inline-flex; align-items:center; gap:5px; border:none; background:transparent; color:var(--accent); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;}
@@ -193,6 +194,26 @@ input,textarea{font-family:inherit;}
 .tool:hover{background:var(--surface2);}
 .tool.danger{color:#cf4d4d;}
 .tool .msr{font-size:16px;}
+.tool.tool-go{color:var(--accent);}
+.tool.tool-go .msr{color:var(--accent);}
+.pcard{cursor:pointer;}
+.pcard .row-tools .tool,.pcard .btn-dir,.pcard [data-gal]{cursor:pointer;}
+
+/* ===== 장소 상세 시트 ===== */
+.detail-photo{width:100%; height:210px; border-radius:var(--radius-sm); overflow:hidden; background:var(--surface2); margin-bottom:16px; position:relative;}
+.detail-cover{width:100%; height:100%; object-fit:cover; display:block;}
+.detail-sub{display:flex; align-items:center; gap:6px; font-size:14.5px; font-weight:700; color:var(--text); margin-bottom:12px;}
+.detail-sub .msr{color:var(--accent);}
+.detail-sub .stars{color:var(--accent);}
+.detail-line{display:flex; align-items:flex-start; gap:9px; font-size:13.5px; color:var(--subtext); margin-top:9px; line-height:1.5;}
+.detail-line .msr{color:var(--accent); flex-shrink:0;}
+.detail-review{margin:16px 0 0; font-size:14px; color:var(--text); line-height:1.65; white-space:pre-wrap;}
+.detail-actions{display:flex; gap:8px; margin-top:20px;}
+.btn-act{flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:48px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; text-decoration:none;}
+.btn-act .msr{color:var(--accent);}
+.btn-act.go{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+.btn-act.go .msr{color:var(--accent-ink);}
+.detail-owner{display:flex; gap:8px; justify-content:flex-end; margin-top:16px; padding-top:14px; border-top:1px solid var(--border);}
 
 /* ===== Goods grid ===== */
 .goods-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:8px 16px 24px;}
@@ -470,6 +491,16 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
   </div>
 </div>
 
+<!-- ===== 장소 상세 시트 ===== -->
+<div class="sheet-overlay" id="detailOverlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head"><h2 id="detailTitle">상세</h2>
+      <button class="sheet-x" id="detailClose"><span class="msr" style="font-size:18px">close</span></button></div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div id="adminModal">
@@ -517,6 +548,15 @@ function mapsSearch(q){return 'https://www.google.com/maps/search/?api=1&query='
 function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q);}
 /* 주소칸에 붙여넣은 구글맵 링크(주소/공유링크) 감지 → '지도/길찾기'가 그 위치로 바로 열리게 */
 function gmapUrl(s){s=(s||'').trim();return (/^https?:\/\//i.test(s)&&/(google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(s))?s:'';}
+/* 장소의 지도/길찾기 링크 계산 (카드·상세 공용): 구글맵 링크 우선 → 좌표 → 이름+주소 검색 */
+function placeLinks(p){
+  const gUrl=gmapUrl(p.addr);
+  const q=(p.name+' '+(p.addr||'')).trim();
+  const hasGeo=(typeof p.lat==='number'&&typeof p.lng==='number');
+  return {gUrl,
+    map:gUrl||(hasGeo?('https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng):mapsSearch(q)),
+    dir:gUrl||(hasGeo?('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng):mapsDir(q))};
+}
 function icon(name,cls,size){return `<span class="msr${cls?' '+cls:''}"${size?` style="font-size:${size}px"`:''}>${name}</span>`;}
 /* 이미지 로드 실패(오프라인·404) 시 기존 '사진' 플레이스홀더로 복귀 */
 function imgErr(img){try{const d=document.createElement('div');d.className='ph '+img.className;d.innerHTML='<span>사진</span>';img.replaceWith(d);}catch(e){}}
@@ -709,11 +749,7 @@ placeSearch.addEventListener('input',()=>{placeQuery=placeSearch.value;document.
 document.getElementById('placeSearchClr').addEventListener('click',()=>{placeSearch.value='';placeQuery='';document.getElementById('placeSearchClr').style.display='none';renderPlaces();});
 function placeCardHTML(p){
   const cat=CAT_MAP[p.cat]||CAT_MAP.food;
-  const gUrl=gmapUrl(p.addr);
-  const q=(p.name+' '+(p.addr||'')).trim();
-  const hasGeo=(typeof p.lat==='number'&&typeof p.lng==='number');
-  const mapUrl=gUrl||(hasGeo?('https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng):mapsSearch(q));
-  const dirUrl=gUrl||(hasGeo?('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng):mapsDir(q));
+  const L=placeLinks(p);const gUrl=L.gUrl,mapUrl=L.map,dirUrl=L.dir;
   const pImgs=parsePhotos(p.photo);
   const pCover=pImgs[0]||SEED_PHOTO_PLACE[p.name]||'';
   const pBadge=pImgs.length>1?`<span class="photo-badge">${icon('photo_library','',13)}${pImgs.length}</span>`:'';
@@ -728,7 +764,7 @@ function placeCardHTML(p){
   const tel=p.contact?`<a class="tool" href="tel:${esc(String(p.contact).replace(/[^+\d]/g,''))}">${icon('call','',16)}전화</a>`:'';
   const own=isAdminMode||(p.ownerUid&&p.ownerUid===myUid);
   const ownTools=own?`<button class="tool" data-edit-place="${p.id}">${icon('edit','',16)}수정</button><button class="tool danger" data-del-place="${p.id}">${icon('delete','',16)}삭제</button>`:'';
-  return `<div class="card pcard"><div class="pcard-inner">
+  return `<div class="card pcard" data-pid="${p.id}"><div class="pcard-inner">
     ${photo}
     <div class="pcard-body">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
@@ -738,10 +774,11 @@ function placeCardHTML(p){
         </div>
       </div>
       ${meta}${review}
-      <div class="pcard-foot">${open}<a class="btn-dir" href="${dirUrl}" target="_blank" rel="noopener">${icon('near_me','fb',15)}길찾기</a></div>
+      <div class="pcard-foot">${open}</div>
       <div class="row-tools">
         <a class="tool" href="${mapUrl}" target="_blank" rel="noopener">${icon('map','',16)}지도</a>
         ${tel}
+        <a class="tool tool-go" href="${dirUrl}" target="_blank" rel="noopener">${icon('near_me','fb',16)}길찾기</a>
         ${ownTools}
       </div>
     </div>
@@ -764,7 +801,51 @@ function renderPlaces(){
   list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',()=>openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace))));
   list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',()=>delPlace(b.dataset.delPlace)));
   list.querySelectorAll('[data-gal]').forEach(el=>el.addEventListener('click',()=>{const it=state.places.find(x=>x.id===el.dataset.gal);if(it)openGallery(parsePhotos(it.photo));}));
+  list.querySelectorAll('.pcard').forEach(card=>card.addEventListener('click',e=>{
+    if(e.target.closest('a,button,[data-gal]'))return; // 지도/전화/길찾기/사진 클릭은 각자 동작
+    const p=state.places.find(x=>x.id===card.dataset.pid);if(p)openPlaceDetail(p);
+  }));
 }
+/* ===== 장소 상세 시트 ===== */
+function openPlaceDetail(p){
+  const cat=CAT_MAP[p.cat]||CAT_MAP.food;
+  const L=placeLinks(p);
+  const imgs=parsePhotos(p.photo);
+  const cover=imgs[0]||SEED_PHOTO_PLACE[p.name]||'';
+  const own=isAdminMode||(p.ownerUid&&p.ownerUid===myUid);
+  const stars=(p.stars&&Number(p.stars)>0)?`<span class="stars">${icon('star','fill',16)}<b>${Number(p.stars).toFixed(1)}</b></span>`:'';
+  const photoBlock=cover?`<div class="detail-photo"${imgs.length?` data-detgal="1" style="cursor:pointer"`:''}><img class="detail-cover" src="${esc(cover)}" alt="" referrerpolicy="no-referrer" onerror="imgErr(this)">${imgs.length>1?`<span class="photo-badge">${icon('photo_library','',13)}${imgs.length}</span>`:''}</div>`:'';
+  const lines=[];
+  lines.push(`<div class="detail-line">${icon('location_on','',17)}<span>${L.gUrl?'📍 구글맵 위치 지정됨':esc(p.addr||'위치 미정')}</span></div>`);
+  if(p.open)lines.push(`<div class="detail-line">${icon('schedule','',17)}<span>${esc(p.open)}</span></div>`);
+  if(p.price)lines.push(`<div class="detail-line">${icon('payments','',17)}<span>${esc(p.price)}</span></div>`);
+  if(p.time)lines.push(`<div class="detail-line">${icon('directions_car','',17)}<span>${esc(p.time)}</span></div>`);
+  if(p.contact)lines.push(`<div class="detail-line">${icon('call','',17)}<span>${esc(p.contact)}</span></div>`);
+  const review=p.review?`<p class="detail-review">${esc(p.review)}</p>`:'';
+  const tel=p.contact?`<a class="btn-act" href="tel:${esc(String(p.contact).replace(/[^+\d]/g,''))}">${icon('call','',18)}전화</a>`:'';
+  document.getElementById('detailTitle').textContent=p.name;
+  document.getElementById('detailBody').innerHTML=`
+    ${photoBlock}
+    <div class="detail-sub">${icon(cat.icon,'b',16)}<span>${esc(cat.label)}</span>${stars?'<span style="opacity:.4">·</span>'+stars:''}</div>
+    ${lines.join('')}
+    ${review}
+    <div class="detail-actions">
+      <a class="btn-act" href="${L.map}" target="_blank" rel="noopener">${icon('map','',18)}지도</a>
+      ${tel}
+      <a class="btn-act go" href="${L.dir}" target="_blank" rel="noopener">${icon('near_me','fb',18)}길찾기</a>
+    </div>
+    ${own?`<div class="detail-owner"><button class="tool" id="detEdit">${icon('edit','',16)}수정</button><button class="tool danger" id="detDel">${icon('delete','',16)}삭제</button></div>`:''}`;
+  const dg=document.querySelector('#detailBody [data-detgal]');
+  if(dg)dg.addEventListener('click',()=>openGallery(parsePhotos(p.photo)));
+  const de=document.getElementById('detEdit');if(de)de.addEventListener('click',()=>{closeDetail();openSheet('places',p);});
+  const dd=document.getElementById('detDel');if(dd)dd.addEventListener('click',()=>{closeDetail();delPlace(p.id);});
+  const ov=document.getElementById('detailOverlay');
+  ov.classList.add('open');document.body.style.overflow='hidden';
+  ov.querySelector('.sheet').scrollTop=0;
+}
+function closeDetail(){const ov=document.getElementById('detailOverlay');ov.classList.remove('open');document.body.style.overflow='';}
+document.getElementById('detailClose').addEventListener('click',closeDetail);
+document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
 function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.collection(COL.places).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
 /* ============ Goods ============ */
