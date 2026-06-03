@@ -266,6 +266,22 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 .sheet-chips{display:flex; gap:8px; overflow-x:auto; flex-wrap:wrap; padding-bottom:2px;}
 .photo-drop{display:flex; align-items:center; justify-content:center; gap:8px; height:64px; border:1.5px dashed var(--border); border-radius:var(--radius-sm); color:var(--subtext); font-size:13.5px; font-weight:600; cursor:pointer;}
 .photo-prev{width:100%; height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:8px; display:none; background:var(--surface2);}
+/* ===== 다중 사진 (업로드 그리드 / 카드 뱃지 / 라이트박스) ===== */
+.photo-grid{display:flex; flex-wrap:wrap; gap:8px;}
+.photo-grid:empty{display:none;}
+.photo-grid:not(:empty){margin-bottom:8px;}
+.photo-thumb{position:relative; width:72px; height:72px; border-radius:var(--radius-sm); overflow:hidden; background:var(--surface2); flex-shrink:0;}
+.photo-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.photo-del{position:absolute; top:3px; right:3px; width:22px; height:22px; border:none; border-radius:999px; background:rgba(15,16,25,.62); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;}
+.pcard-photo-cell{position:relative; flex-shrink:0; align-self:stretch; display:flex;}
+.gcard-photo-cell{position:relative;}
+.photo-badge{position:absolute; right:6px; bottom:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(15,16,25,.62); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px; pointer-events:none;}
+.lightbox{position:fixed; inset:0; z-index:300; background:rgba(8,9,14,.93); display:flex; align-items:center; animation:fadeIn .2s ease;}
+.lb-track{display:flex; width:100%; height:100%; overflow-x:auto; scroll-snap-type:x mandatory;}
+.lb-slide{flex:0 0 100%; width:100%; height:100%; scroll-snap-align:center; display:flex; align-items:center; justify-content:center; padding:16px;}
+.lb-slide img{max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;}
+.lb-close{position:absolute; top:calc(12px + env(safe-area-inset-top)); right:14px; z-index:2; width:40px; height:40px; border:none; border-radius:999px; background:rgba(255,255,255,.16); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+.lb-counter{position:absolute; bottom:calc(18px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); color:#fff; font-size:13px; font-weight:600; background:rgba(0,0,0,.45); padding:4px 12px; border-radius:999px;}
 .sheet-actions{display:flex; gap:10px; margin-top:8px;}
 .btn-cancel{flex:1; height:50px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
 .btn-save{flex:1.6; height:50px; border-radius:var(--radius-sm); border:none; background:var(--accent); color:var(--accent-ink); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
@@ -504,6 +520,19 @@ function mapsDir(q){return 'https://www.google.com/maps/dir/?api=1&destination='
 function icon(name,cls,size){return `<span class="msr${cls?' '+cls:''}"${size?` style="font-size:${size}px"`:''}>${name}</span>`;}
 /* 이미지 로드 실패(오프라인·404) 시 기존 '사진' 플레이스홀더로 복귀 */
 function imgErr(img){try{const d=document.createElement('div');d.className='ph '+img.className;d.innerHTML='<span>사진</span>';img.replaceWith(d);}catch(e){}}
+/* 다중 사진: Firestore 규칙이 새 필드(photos)를 막아, 기존 photo 필드에 JSON 배열 문자열로 저장.
+   읽기=parsePhotos(항상 배열), 쓰기=packPhotos(0→null,1→문자열,2+→JSON) */
+function parsePhotos(p){
+  if(!p) return [];
+  if(Array.isArray(p)) return p.filter(Boolean);
+  if(typeof p==='string'){
+    const s=p.trim();
+    if(s.charAt(0)==='['){try{const a=JSON.parse(s);return Array.isArray(a)?a.filter(x=>typeof x==='string'&&x):[];}catch(e){return [p];}}
+    return [p];
+  }
+  return [];
+}
+function packPhotos(arr){arr=(arr||[]).filter(Boolean);return arr.length===0?null:(arr.length===1?arr[0]:JSON.stringify(arr));}
 
 /* ============ Image resize ============ */
 function resizeImage(file,max=800,quality=.6){
@@ -546,6 +575,7 @@ const NAV=[
 ];
 
 /* ============ State ============ */
+const MAX_PHOTOS=6; // 장소·특산물당 최대 사진 수 (Firestore 1MB 문서 제한 고려)
 let state={places:[],products:[],tips:[],rate:15.7};
 let curTab='exchange';
 let placeFilter='all';
@@ -663,8 +693,11 @@ function placeCardHTML(p){
   const hasGeo=(typeof p.lat==='number'&&typeof p.lng==='number');
   const mapUrl=hasGeo?('https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng):mapsSearch(q);
   const dirUrl=hasGeo?('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng):mapsDir(q);
-  const pPhoto=p.photo||SEED_PHOTO_PLACE[p.name]||'';
-  const photo=pPhoto?`<img class="pcard-photo" src="${esc(pPhoto)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="imgErr(this)">`:`<div class="ph pcard-photo"><span>사진</span></div>`;
+  const pImgs=parsePhotos(p.photo);
+  const pCover=pImgs[0]||SEED_PHOTO_PLACE[p.name]||'';
+  const pBadge=pImgs.length>1?`<span class="photo-badge">${icon('photo_library','',13)}${pImgs.length}</span>`:'';
+  const pInner=pCover?`<img class="pcard-photo" src="${esc(pCover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="imgErr(this)">`:`<div class="ph pcard-photo"><span>사진</span></div>`;
+  const photo=`<div class="pcard-photo-cell"${pImgs.length?` data-gal="${p.id}" style="cursor:pointer"`:''}>${pInner}${pBadge}</div>`;
   const rating=(p.stars&&Number(p.stars)>0)?`<span class="stars">${icon('star','fill',14)}<b>${Number(p.stars).toFixed(1)}</b></span>`:'';
   const price=p.price?`<span class="pr">${esc(p.price)}</span>`:'';
   const mins=p.time?`<span class="mins">${icon('directions_car','',14)}${esc(p.time)}</span>`:'';
@@ -709,14 +742,18 @@ function renderPlaces(){
   list.innerHTML=arr.map(placeCardHTML).join('');
   list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',()=>openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace))));
   list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',()=>delPlace(b.dataset.delPlace)));
+  list.querySelectorAll('[data-gal]').forEach(el=>el.addEventListener('click',()=>{const it=state.places.find(x=>x.id===el.dataset.gal);if(it)openGallery(parsePhotos(it.photo));}));
 }
 function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.collection(COL.places).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
 /* ============ Goods ============ */
 function goodsCardHTML(g){
   const own=isAdminMode||(g.ownerUid&&g.ownerUid===myUid);
-  const gPhoto=g.photo||SEED_PHOTO_PRODUCT[g.name]||'';
-  const photo=gPhoto?`<img class="gcard-photo" src="${esc(gPhoto)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="imgErr(this)">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
+  const gImgs=parsePhotos(g.photo);
+  const gCover=gImgs[0]||SEED_PHOTO_PRODUCT[g.name]||'';
+  const gBadge=gImgs.length>1?`<span class="photo-badge">${icon('photo_library','',13)}${gImgs.length}</span>`:'';
+  const gInner=gCover?`<img class="gcard-photo" src="${esc(gCover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="imgErr(this)">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
+  const photo=`<div class="gcard-photo-cell"${gImgs.length?` data-gal="${g.id}" style="cursor:pointer"`:''}>${gInner}${gBadge}</div>`;
   const priceNum=parseFloat(g.price);
   const krw=(priceNum>0)?` <span class="krw">(≈ ${fmt(Math.round(priceNum*state.rate))}원)</span>`:'';
   const price=g.price?`<div class="gcard-price">약 ₹${esc(g.price)}${krw}</div>`:'';
@@ -739,6 +776,22 @@ function renderGoods(){
   list.innerHTML=state.products.map(goodsCardHTML).join('');
   list.querySelectorAll('[data-edit-good]').forEach(b=>b.addEventListener('click',()=>openSheet('goods',state.products.find(x=>x.id===b.dataset.editGood))));
   list.querySelectorAll('[data-del-good]').forEach(b=>b.addEventListener('click',()=>delGood(b.dataset.delGood)));
+  list.querySelectorAll('[data-gal]').forEach(el=>el.addEventListener('click',()=>{const it=state.products.find(x=>x.id===el.dataset.gal);if(it)openGallery(parsePhotos(it.photo));}));
+}
+/* ===== 사진 라이트박스 (좌우 스와이프) ===== */
+function openGallery(imgs){
+  imgs=(imgs||[]).filter(Boolean);if(!imgs.length)return;
+  const lb=document.createElement('div');lb.className='lightbox';
+  lb.innerHTML=`<button class="lb-close" type="button" aria-label="닫기">${icon('close','',24)}</button>`+
+    `<div class="lb-track">${imgs.map(s=>`<div class="lb-slide"><img src="${esc(s)}" alt="" referrerpolicy="no-referrer"></div>`).join('')}</div>`+
+    `<div class="lb-counter">1 / ${imgs.length}</div>`;
+  document.body.appendChild(lb);document.body.style.overflow='hidden';
+  const track=lb.querySelector('.lb-track'),counter=lb.querySelector('.lb-counter');
+  const close=()=>{lb.remove();document.body.style.overflow='';};
+  lb.addEventListener('click',e=>{if(e.target===lb)close();});
+  lb.querySelector('.lb-close').addEventListener('click',close);
+  if(imgs.length>1)track.addEventListener('scroll',()=>{const i=Math.round(track.scrollLeft/Math.max(1,track.clientWidth));counter.textContent=(i+1)+' / '+imgs.length;});
+  else counter.style.display='none';
 }
 function delGood(id){if(!confirm('이 특산물을 삭제할까요?'))return;fdb.collection(COL.products).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
@@ -783,7 +836,7 @@ function delTip(id){if(!confirm('이 팁을 삭제할까요?'))return;fdb.collec
 
 /* ============ Add / Edit sheet ============ */
 const sheetOverlay=document.getElementById('sheetOverlay');
-let sheetTab=null,sheetEditId=null,sheetCat=null,sheetStars=0,sheetPhoto=null,sheetLat=null,sheetLng=null;
+let sheetTab=null,sheetEditId=null,sheetCat=null,sheetStars=0,sheetPhotos=[],sheetLat=null,sheetLng=null;
 let pickMap=null,pickMarker=null;
 document.getElementById('fab').addEventListener('click',()=>openSheet(curTab==='goods'?'goods':curTab==='tips'?'tips':'places'));
 document.getElementById('sheetClose').addEventListener('click',closeSheet);
@@ -799,7 +852,8 @@ function chipsHTML(cats,active,withIcon){
 }
 function openSheet(tab,item){
   destroyPickMap();
-  sheetTab=tab;sheetEditId=item?item.id:null;sheetPhoto=item?(item.photo||null):null;
+  sheetTab=tab;sheetEditId=item?item.id:null;
+  sheetPhotos=item?parsePhotos(item.photo):[];
   const titles={places:item?'장소 수정':'새 장소 추가',goods:item?'특산물 수정':'새 특산물 추가',tips:item?'팁 수정':'새 팁 추가'};
   document.getElementById('sheetTitle').textContent=titles[tab];
   const body=document.getElementById('sheetBody');
@@ -856,10 +910,17 @@ function openSheet(tab,item){
   document.querySelector('.sheet').scrollTop=0;
 }
 function photoFieldHTML(){
-  return `<label class="field"><span class="lbl">사진</span>
-    <img class="photo-prev" id="f_photoPrev"${sheetPhoto?` src="${esc(sheetPhoto)}" style="display:block"`:''}>
-    <div class="photo-drop" id="f_photoDrop">${icon('photo_camera','',20)}사진 선택 / 촬영하기</div>
-    <input type="file" id="f_photoFile" accept="image/*" hidden></label>`;
+  return `<div class="field"><span class="lbl">사진 <span style="font-weight:500;color:var(--subtext)">· 여러 장 가능 (최대 ${MAX_PHOTOS}장)</span></span>
+    <div class="photo-grid" id="f_photoGrid"></div>
+    <div class="photo-drop" id="f_photoDrop">${icon('add_a_photo','',20)}사진 추가 / 촬영하기</div>
+    <input type="file" id="f_photoFile" accept="image/*" multiple hidden></div>`;
+}
+function renderPhotoGrid(){
+  const g=document.getElementById('f_photoGrid');if(!g)return;
+  g.innerHTML=sheetPhotos.map((src,i)=>`<div class="photo-thumb"><img src="${esc(src)}" alt=""><button type="button" class="photo-del" data-pi="${i}">${icon('close','',16)}</button></div>`).join('');
+  g.querySelectorAll('[data-pi]').forEach(b=>b.addEventListener('click',()=>{sheetPhotos.splice(+b.dataset.pi,1);renderPhotoGrid();}));
+  const drop=document.getElementById('f_photoDrop');
+  if(drop)drop.style.display=(sheetPhotos.length>=MAX_PHOTOS)?'none':'flex';
 }
 function bindCatChips(){
   document.querySelectorAll('#catChips [data-chip]').forEach(b=>b.addEventListener('click',()=>{
@@ -874,13 +935,21 @@ function bindStarPick(){
   }));
 }
 function bindPhoto(){
-  const drop=document.getElementById('f_photoDrop'),file=document.getElementById('f_photoFile'),prev=document.getElementById('f_photoPrev');
+  const drop=document.getElementById('f_photoDrop'),file=document.getElementById('f_photoFile');
   if(!drop)return;
+  renderPhotoGrid();
   drop.addEventListener('click',()=>file.click());
   file.addEventListener('change',async e=>{
-    const f=e.target.files[0];if(!f)return;toast('사진 처리 중…');
-    try{const d=await resizeImage(f);sheetPhoto=d;prev.src=d;prev.style.display='block';}
-    catch(err){toast('사진을 불러오지 못했어요');}
+    const files=[...e.target.files];if(!files.length)return;
+    const room=MAX_PHOTOS-sheetPhotos.length;
+    if(room<=0){toast(`사진은 최대 ${MAX_PHOTOS}장까지예요`);file.value='';return;}
+    const use=files.slice(0,room);
+    toast(files.length>room?`최대 ${MAX_PHOTOS}장 — ${use.length}장만 추가돼요`:'사진 처리 중…');
+    for(const f of use){
+      try{const d=await resizeImage(f);sheetPhotos.push(d);renderPhotoGrid();}
+      catch(err){toast('일부 사진을 불러오지 못했어요');}
+    }
+    file.value='';
   });
 }
 /* ---- 지도 위치 선택 (Leaflet + OSM, 좌표는 구글맵 길찾기에 사용) ---- */
@@ -969,12 +1038,12 @@ document.getElementById('sheetSave').addEventListener('click',async()=>{
     const name=val('f_name');if(!name){toast('이름을 입력하세요');return;}
     col=COL.places;
     data={name,cat:sheetCat||'food',addr:val('f_addr'),contact:val('f_contact'),time:val('f_time'),
-      price:val('f_price'),open:val('f_open'),review:val('f_review'),stars:Number(sheetStars)||0,photo:sheetPhoto||null};
+      price:val('f_price'),open:val('f_open'),review:val('f_review'),stars:Number(sheetStars)||0,photo:packPhotos(sheetPhotos)};
     if(sheetLat!=null&&sheetLng!=null){data.lat=sheetLat;data.lng=sheetLng;}
   }else if(sheetTab==='goods'){
     const name=val('f_name');if(!name){toast('이름을 입력하세요');return;}
     col=COL.products;
-    data={name,desc:val('f_desc'),shop:val('f_shop'),price:val('f_price'),photo:sheetPhoto||null};
+    data={name,desc:val('f_desc'),shop:val('f_shop'),price:val('f_price'),photo:packPhotos(sheetPhotos)};
   }else{
     const title=val('f_title');if(!title){toast('제목을 입력하세요');return;}
     col=COL.tips;
@@ -1082,6 +1151,20 @@ const SEED_PLACES=[
   {cat:'bar',name:'Noidawery',addr:'Greater Noida West',price:'₹₹₹',open:'영업 중 · ~24:00',review:'그레이터 노이다 대표 수제맥주 펍.',stars:4.3},
   {cat:'bar',name:'Gallontree',addr:'Pari Chowk, Greater Noida',price:'₹₹₹',open:'영업 중 · ~01:00',review:'파리 초크의 활기찬 바·다이닝. 멀티 퀴진과 바를 함께.',stars:4.2},
   {cat:'care',name:'Sharda Hospital',addr:'Knowledge Park III, Greater Noida',price:'—',open:'24시간',review:'그레이터 노이다 대형 종합병원. 응급·국제진료 운영.',stars:4.0},
+  // ===== 한식당 (이름+지역, 길찾기는 구글맵 이름검색) =====
+  {cat:'food',name:'한빛',addr:'Delhi NCR',price:'₹₹',review:'델리 NCR 한인 식당. 한국 가정식.'},
+  {cat:'food',name:'서라벌',addr:'Delhi NCR',price:'₹₹₹',review:'한식당 · 고기·정찬 메뉴.'},
+  {cat:'food',name:'미소',addr:'Greater Noida',price:'₹₹',review:'그레이터노이다 한인 식당. 찌개·덮밥 등.'},
+  {cat:'food',name:'쉼터',addr:'Delhi NCR',price:'₹₹',review:'한인들이 찾는 한식당. 가정식·반찬.'},
+  {cat:'food',name:'홍콩',addr:'Delhi NCR',price:'₹₹',review:'한식·중화풍 메뉴를 내는 식당.'},
+  // ===== 그레이터노이다 마트 =====
+  {cat:'shop',name:'K프렌즈',addr:'Greater Noida',price:'—',review:'그레이터노이다 한인 마트. 한국 식재료·생필품.'},
+  {cat:'shop',name:'D마트',addr:'Greater Noida',price:'—',review:'그레이터노이다 생활·식료품 마트.'},
+  {cat:'shop',name:'실라마트',addr:'Greater Noida',price:'—',review:'그레이터노이다 마트. 식료품·생필품.'},
+  // ===== 명소 =====
+  {cat:'sight',name:'Red Fort',addr:'Old Delhi',open:'09:30–16:30(월 휴무)',price:'₹₹',review:'무굴 황제의 붉은 사암 성채. 유네스코 세계유산.',stars:4.5},
+  {cat:'sight',name:'India Gate',addr:'Kartavya Path, New Delhi',open:'24시간',price:'무료',review:'1차 대전 전몰장병 추모 개선문. 야경 명소.',stars:4.6},
+  {cat:'sight',name:'Taj Mahal',addr:'Agra (델리에서 차로 3~4시간)',open:'일출–일몰(금 휴무)',price:'₹₹₹',review:'세계적 대리석 영묘, 유네스코 세계유산. 아그라 당일치기 인기.',stars:4.8},
 ];
 const SEED_PRODUCTS=[
   {name:'다즐링 홍차',desc:'향이 섬세한 퍼스트 플러시 추천. 봉인된 정품 확인.',shop:'Dilli Haat / 차 전문점',price:'350'},
@@ -1091,6 +1174,9 @@ const SEED_PRODUCTS=[
   {name:'히말라야 립밤',desc:'천연 성분 립밤. 저렴하고 가벼워 선물용으로 인기.',shop:'약국·드러그스토어 / Himalaya 매장',price:'120'},
   {name:'파티스마트 (Himalaya PartySmart)',desc:'음주 전후 챙기는 허브 캡슐. 여행자 사이에서 유명한 숙취 대비템.',shop:'약국·드러그스토어',price:'150'},
   {name:'히말라야 넘 페이스워시',desc:'님(Neem) 성분 페이스워시. 트러블 케어로 스테디셀러.',shop:'약국·드러그스토어',price:'180'},
+  {name:'석청',desc:'히말라야 절벽 야생벌집에서 채취하는 천연꿀. 희소해 고가, 최고급 선물용.',shop:'재래시장·산지 직거래',price:''},
+  {name:'목청',desc:'야생 나무 구멍 벌집에서 얻는 천연꿀. 향이 진하고 귀함.',shop:'재래시장·산지 직거래',price:''},
+  {name:'히말라야 비누',desc:'히말라야 허브 성분 비누. 가볍고 저렴해 선물용으로 인기.',shop:'약국·드러그스토어 / Himalaya 매장',price:'80'},
 ];
 const SEED_TIPS=[
   {cat:'교통',title:'릭샤보다 Uber·Ola 앱',body:'오토릭샤는 미터를 잘 안 켜요. 앱으로 부르면 요금이 정해져 흥정 스트레스가 없습니다. 차량 번호 대조 필수.'},
@@ -1118,6 +1204,17 @@ const SEED_PHOTO_PLACE={
   'Noidawery':'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Fuller%27s_India_pale_ale.jpg/330px-Fuller%27s_India_pale_ale.jpg',
   'Gallontree':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/15-09-26-RalfR-WLC-0084.jpg/330px-15-09-26-RalfR-WLC-0084.jpg',
   'Sharda Hospital':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Hospital-de-Bellvitge.jpg/330px-Hospital-de-Bellvitge.jpg',
+  '한빛':'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dolsot-bibimbap.jpg/330px-Dolsot-bibimbap.jpg',
+  '서라벌':'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Korean_BBQ_Seoul.jpg/330px-Korean_BBQ_Seoul.jpg',
+  '미소':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Korean_stew_dish_-_Kimchi-jjigae_Kimchi_Stew_2019_%2801%29.jpg/330px-Korean_stew_dish_-_Kimchi-jjigae_Kimchi_Stew_2019_%2801%29.jpg',
+  '쉼터':'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Banchan.jpg/330px-Banchan.jpg',
+  '홍콩':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Jajangmyeon.jpg/330px-Jajangmyeon.jpg',
+  'K프렌즈':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Westside_Market_in_Manhattan%2C_NYC_IMG_5615.JPG/330px-Westside_Market_in_Manhattan%2C_NYC_IMG_5615.JPG',
+  'D마트':'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Stop%26Shop.jpg/330px-Stop%26Shop.jpg',
+  '실라마트':'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Convenience_store_interior.jpg/330px-Convenience_store_interior.jpg',
+  'Red Fort':'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Delhi_fort.jpg/330px-Delhi_fort.jpg',
+  'India Gate':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/India_Gate_%28All_India_War_Memorial%29.jpg/330px-India_Gate_%28All_India_War_Memorial%29.jpg',
+  'Taj Mahal':'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Taj_Mahal_%28Edited%29.jpeg/330px-Taj_Mahal_%28Edited%29.jpeg',
 };
 const SEED_PHOTO_PRODUCT={
   '다즐링 홍차':'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Darjeeling%2C_India%2C_Darjeeling_tea_in_variety%2C_Black_tea.jpg/330px-Darjeeling%2C_India%2C_Darjeeling_tea_in_variety%2C_Black_tea.jpg',
@@ -1127,6 +1224,9 @@ const SEED_PHOTO_PRODUCT={
   '히말라야 립밤':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Homemade_lip_balm.jpg/330px-Homemade_lip_balm.jpg',
   '파티스마트 (Himalaya PartySmart)':'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/A_course_of_green_cefalexin_pills.jpg/330px-A_course_of_green_cefalexin_pills.jpg',
   '히말라야 넘 페이스워시':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Neem_Tree_in_Rajasthan%2C_India.jpg/330px-Neem_Tree_in_Rajasthan%2C_India.jpg',
+  '석청':'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Runny_hunny.jpg/330px-Runny_hunny.jpg',
+  '목청':'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Honey_comb.jpg/330px-Honey_comb.jpg',
+  '히말라야 비누':'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Handmade_soap_cropped_and_simplified.jpg/330px-Handmade_soap_cropped_and_simplified.jpg',
 };
 async function seedCollection(key){
   try{
