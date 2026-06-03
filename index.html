@@ -663,6 +663,31 @@ const COL={places:'ncr_places',products:'ncr_products',tips:'ncr_tips'};
 let myUid=null;
 function tsNow(){return firebase.firestore.FieldValue.serverTimestamp();}
 
+/* ============ 뒤로가기(안드로이드/제스처) → 오버레이 닫기 ============ */
+/* PWA standalone에서 모달·상세·갤러리를 열고 기기 뒤로가기를 누르면
+   앱 자체가 종료되던 문제를 history 스택으로 해결. 오버레이를 열 때
+   history 항목을 1개 쌓고, 뒤로가기(popstate) 시 가장 위 오버레이만 닫는다. */
+const navStack=[];         // 각 항목: 오버레이를 닫는 DOM 함수
+let navBacking=false;      // history.back() 재진입(연타) 가드
+function navPush(closeFn){
+  navStack.push(closeFn);
+  try{history.pushState({ncrDepth:navStack.length},'');}catch(e){}
+}
+/* 사용자가 X·취소·배경클릭·저장완료 등으로 닫을 때 호출 → 실제 닫기는 popstate에서 */
+function navClose(){
+  if(navStack.length&&!navBacking){navBacking=true;history.back();}
+}
+/* 한 오버레이를 다른 오버레이로 교체(예: 상세→수정). history 깊이는 그대로 유지 */
+function navReplace(closeFn){
+  if(navStack.length)navStack[navStack.length-1]=closeFn;
+  else navPush(closeFn);
+}
+window.addEventListener('popstate',()=>{
+  navBacking=false;
+  const fn=navStack.pop();
+  if(fn){try{fn();}catch(e){}}
+});
+
 /* ============ Navigation ============ */
 function buildNav(){
   const nav=document.getElementById('nav');
@@ -868,13 +893,15 @@ function openPlaceDetail(p){
     ${own?`<div class="detail-owner"><button class="tool" id="detEdit">${icon('edit','',16)}수정</button><button class="tool danger" id="detDel">${icon('delete','',16)}삭제</button></div>`:''}`;
   const dg=document.querySelector('#detailBody [data-detgal]');
   if(dg)dg.addEventListener('click',()=>openGallery(parsePhotos(p.photo)));
-  const de=document.getElementById('detEdit');if(de)de.addEventListener('click',()=>{closeDetail();openSheet('places',p);});
+  const de=document.getElementById('detEdit');if(de)de.addEventListener('click',()=>{closeDetailDom();navReplace(closeSheetDom);openSheetDom('places',p);});
   const dd=document.getElementById('detDel');if(dd)dd.addEventListener('click',()=>{closeDetail();delPlace(p.id);});
   const ov=document.getElementById('detailOverlay');
   ov.classList.add('open');document.body.style.overflow='hidden';
   ov.querySelector('.sheet').scrollTop=0;
+  navPush(closeDetailDom);
 }
-function closeDetail(){const ov=document.getElementById('detailOverlay');ov.classList.remove('open');document.body.style.overflow='';}
+function closeDetailDom(){const ov=document.getElementById('detailOverlay');ov.classList.remove('open');document.body.style.overflow='';}
+function closeDetail(){navClose();}
 document.getElementById('detailClose').addEventListener('click',closeDetail);
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
 function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.collection(COL.places).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
@@ -920,11 +947,13 @@ function openGallery(imgs){
     `<div class="lb-counter">1 / ${imgs.length}</div>`;
   document.body.appendChild(lb);document.body.style.overflow='hidden';
   const track=lb.querySelector('.lb-track'),counter=lb.querySelector('.lb-counter');
-  const close=()=>{lb.remove();document.body.style.overflow='';};
-  lb.addEventListener('click',e=>{if(e.target===lb)close();});
-  lb.querySelector('.lb-close').addEventListener('click',close);
+  const detailOpen=document.getElementById('detailOverlay').classList.contains('open');
+  const close=()=>{lb.remove();if(!detailOpen)document.body.style.overflow='';};
+  lb.addEventListener('click',e=>{if(e.target===lb)navClose();});
+  lb.querySelector('.lb-close').addEventListener('click',navClose);
   if(imgs.length>1)track.addEventListener('scroll',()=>{const i=Math.round(track.scrollLeft/Math.max(1,track.clientWidth));counter.textContent=(i+1)+' / '+imgs.length;});
   else counter.style.display='none';
+  navPush(close);
 }
 function delGood(id){if(!confirm('이 특산물을 삭제할까요?'))return;fdb.collection(COL.products).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
 
@@ -976,14 +1005,16 @@ document.getElementById('sheetClose').addEventListener('click',closeSheet);
 document.getElementById('sheetCancel').addEventListener('click',closeSheet);
 sheetOverlay.addEventListener('click',e=>{if(e.target===sheetOverlay)closeSheet();});
 function destroyPickMap(){if(pickMap){try{pickMap.remove();}catch(e){}pickMap=null;pickMarker=null;}}
-function closeSheet(){sheetOverlay.classList.remove('open');document.body.style.overflow='';destroyPickMap();}
+function closeSheetDom(){sheetOverlay.classList.remove('open');document.body.style.overflow='';destroyPickMap();}
+function closeSheet(){navClose();}
 function chipsHTML(cats,active,withIcon){
   return cats.map(c=>{
     const id=withIcon?c.id:c;const label=withIcon?c.label:c;
     return `<button type="button" class="chip${withIcon?' ico':''}${active===id?' active':''}" data-chip="${esc(id)}">${withIcon?icon(c.icon,'b',17):''}${esc(label)}</button>`;
   }).join('');
 }
-function openSheet(tab,item){
+function openSheet(tab,item){openSheetDom(tab,item);navPush(closeSheetDom);}
+function openSheetDom(tab,item){
   destroyPickMap();
   sheetTab=tab;sheetEditId=item?item.id:null;
   sheetPhotos=item?parsePhotos(item.photo):[];
@@ -1255,8 +1286,10 @@ function openAdminGate(){
   document.getElementById('adminPw').value='';
   adminModal.classList.add('open');document.body.style.overflow='hidden';
   setTimeout(()=>document.getElementById('adminPw').focus(),50);
+  navPush(closeAdminGateDom);
 }
-function closeAdminGate(){adminModal.classList.remove('open');document.body.style.overflow='';}
+function closeAdminGateDom(){adminModal.classList.remove('open');document.body.style.overflow='';}
+function closeAdminGate(){navClose();}
 document.getElementById('adminCancel').addEventListener('click',closeAdminGate);
 adminModal.addEventListener('click',e=>{if(e.target===adminModal)closeAdminGate();});
 document.getElementById('adminPw').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adminOk').click();});
