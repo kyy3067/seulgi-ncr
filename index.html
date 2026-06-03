@@ -277,6 +277,25 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 .pickmap .leaflet-control-attribution{font-size:9px;}
 .pick-hint{font-size:12.5px; color:var(--accent); font-weight:600; margin-top:8px; min-height:16px; display:flex; align-items:center; gap:4px;}
 
+/* ===== 관리자 모드 ===== */
+.admin-bar{position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 16px; background:#23262f; color:#fff; font-size:12.5px; font-weight:700;}
+.admin-bar-acts{display:flex; gap:8px;}
+.admin-bar button{border:none; border-radius:999px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;}
+#adminWipe{background:var(--error); color:#fff;}
+#adminExit{background:rgba(255,255,255,.22); color:#fff;}
+#adminModal{position:fixed; inset:0; z-index:130; background:rgba(15,16,25,.5); display:none; align-items:center; justify-content:center; padding:24px;}
+#adminModal.open{display:flex;}
+.admin-box{width:100%; max-width:320px; background:var(--surface); border-radius:20px; padding:24px 22px; box-shadow:0 16px 48px rgba(0,0,0,.2); text-align:center;}
+.admin-box .ic{width:50px; height:50px; border-radius:14px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;}
+.admin-box h3{margin:0 0 6px; font-size:18px; font-weight:800; color:var(--text);}
+.admin-sub{margin:0 0 14px; font-size:12.5px; color:var(--subtext); line-height:1.5;}
+#adminPw{width:100%; box-sizing:border-box; height:46px; padding:0 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); font-family:inherit; font-size:15px; color:var(--text); outline:none; text-align:center; margin-bottom:10px;}
+#adminPw:focus{border-color:var(--accent); background:var(--surface);}
+.admin-acts{display:flex; gap:10px;}
+.admin-acts button{flex:1; height:46px; border-radius:var(--radius-sm); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;}
+#adminCancel{border:1px solid var(--border); background:var(--surface); color:var(--text);}
+#adminOk{border:none; background:var(--accent); color:var(--accent-ink);}
+
 
 /* ===== Toast ===== */
 .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); white-space:nowrap; pointer-events:none;}
@@ -326,12 +345,16 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 <body>
 <div class="app">
   <header class="brandbar">
-    <div class="brand-logo"><span class="msr fill" style="font-size:19px">spa</span></div>
+    <div class="brand-logo" id="brandLogo"><span class="msr fill" style="font-size:19px">spa</span></div>
     <div class="brand-name">슬기로운 NCR</div>
     <div class="brand-loc"><span class="msr fill" style="font-size:16px">location_on</span>Delhi NCR</div>
   </header>
 
   <main class="content">
+    <div class="admin-bar" id="adminBar" style="display:none">
+      <span>🛡 관리자 모드</span>
+      <span class="admin-bar-acts"><button id="adminWipe">현재 탭 전체삭제</button><button id="adminExit">해제</button></span>
+    </div>
     <!-- ===== 환율 ===== -->
     <section id="view-exchange" class="view active">
       <div class="ex-wrap">
@@ -429,6 +452,16 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div id="adminModal">
+  <div class="admin-box">
+    <div class="ic"><span class="msr fill" style="font-size:26px">admin_panel_settings</span></div>
+    <h3 id="adminTitle">관리자 모드</h3>
+    <p class="admin-sub" id="adminSub"></p>
+    <input id="adminPw" type="password" autocomplete="off" placeholder="비밀번호">
+    <div class="admin-acts"><button id="adminCancel">취소</button><button id="adminOk">확인</button></div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -631,7 +664,7 @@ function placeCardHTML(p){
   const review=p.review?`<p class="pcard-review">${esc(p.review)}</p>`:'';
   const open=p.open?`<span class="open${String(p.open).includes('영업 중')?' now':''}">${esc(p.open)}</span>`:'<span></span>';
   const tel=p.contact?`<a class="tool" href="tel:${esc(String(p.contact).replace(/[^+\d]/g,''))}">${icon('call','',16)}전화</a>`:'';
-  const own=p.ownerUid&&p.ownerUid===myUid;
+  const own=isAdminMode||(p.ownerUid&&p.ownerUid===myUid);
   const ownTools=own?`<button class="tool" data-edit-place="${p.id}">${icon('edit','',16)}수정</button><button class="tool danger" data-del-place="${p.id}">${icon('delete','',16)}삭제</button>`:'';
   return `<div class="card pcard"><div class="pcard-inner">
     ${photo}
@@ -673,7 +706,7 @@ function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.c
 
 /* ============ Goods ============ */
 function goodsCardHTML(g){
-  const own=g.ownerUid&&g.ownerUid===myUid;
+  const own=isAdminMode||(g.ownerUid&&g.ownerUid===myUid);
   const photo=g.photo?`<img class="gcard-photo" src="${esc(g.photo)}" alt="">`:`<div class="ph gcard-photo"><span>사진</span></div>`;
   const priceNum=parseFloat(g.price);
   const krw=(priceNum>0)?` <span class="krw">(≈ ${fmt(Math.round(priceNum*state.rate))}원)</span>`:'';
@@ -713,7 +746,7 @@ function buildTipCats(){
   }));
 }
 function tipCardHTML(t){
-  const own=t.ownerUid&&t.ownerUid===myUid;
+  const own=isAdminMode||(t.ownerUid&&t.ownerUid===myUid);
   return `<div class="card tcard">
     <div class="tcard-head">
       <span class="tcat">${icon(TIP_ICON[t.cat]||'label','b',14)}${esc(t.cat)}</span>
@@ -931,6 +964,69 @@ window.addEventListener('appinstalled',()=>{installBtn.style.display='none';defe
 installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();try{await deferredPrompt.userChoice;}catch(e){}deferredPrompt=null;installBtn.style.display='none';});
 (function(){const ua=navigator.userAgent||'';if(/iphone|ipad|ipod/i.test(ua)&&!isStandalone()){document.getElementById('iosNote').style.display='block';}})();
 
+/* ============ 관리자 모드 ============ */
+let isAdminMode=false;
+async function sha(s){
+  try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}}catch(e){}
+  let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return 'f'+h.toString(16);
+}
+async function checkAdmin(){
+  if(!myUid)return;
+  try{const d=await fdb.collection('admins').doc(myUid).get();if(d&&d.exists){isAdminMode=true;applyAdminUI();}}catch(e){}
+}
+function applyAdminUI(){
+  document.getElementById('adminBar').style.display=isAdminMode?'flex':'none';
+  renderPlaces();renderGoods();renderTips();
+}
+(function(){
+  const logo=document.getElementById('brandLogo');let taps=0,tmr=null;
+  logo.addEventListener('click',()=>{taps++;clearTimeout(tmr);tmr=setTimeout(()=>taps=0,1500);if(taps>=5){taps=0;openAdminGate();}});
+})();
+const adminModal=document.getElementById('adminModal');
+function openAdminGate(){
+  if(isAdminMode){toast('이미 관리자 모드예요');return;}
+  document.getElementById('adminSub').textContent='관리자 비밀번호를 입력하세요. (처음이면 입력한 값으로 설정됩니다)';
+  document.getElementById('adminPw').value='';
+  adminModal.classList.add('open');document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('adminPw').focus(),50);
+}
+function closeAdminGate(){adminModal.classList.remove('open');document.body.style.overflow='';}
+document.getElementById('adminCancel').addEventListener('click',closeAdminGate);
+adminModal.addEventListener('click',e=>{if(e.target===adminModal)closeAdminGate();});
+document.getElementById('adminPw').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adminOk').click();});
+document.getElementById('adminOk').addEventListener('click',async()=>{
+  const pw=document.getElementById('adminPw').value;
+  if(!pw){toast('비밀번호를 입력하세요');return;}
+  if(!myUid){toast('연결 중이에요. 잠시 후 다시');return;}
+  const ok=document.getElementById('adminOk');ok.disabled=true;
+  const h=await sha(pw);
+  let res='wrong';
+  try{await fdb.collection('admins').doc(myUid).set({codeHash:h});res='ok';}
+  catch(e){
+    try{await fdb.collection('config').doc('app').set({codeHash:h});await fdb.collection('admins').doc(myUid).set({codeHash:h});res='setup';}
+    catch(e2){res='wrong';}
+  }
+  ok.disabled=false;
+  if(res==='ok'||res==='setup'){isAdminMode=true;closeAdminGate();applyAdminUI();toast(res==='setup'?'관리자 비밀번호가 설정됐어요':'관리자 모드로 들어왔어요');}
+  else toast('비밀번호가 올바르지 않아요');
+});
+document.getElementById('adminExit').addEventListener('click',async()=>{
+  try{await fdb.collection('admins').doc(myUid).delete();}catch(e){}
+  isAdminMode=false;applyAdminUI();toast('관리자 모드를 해제했어요');
+});
+document.getElementById('adminWipe').addEventListener('click',async()=>{
+  const key=(curTab==='goods')?'products':(curTab==='tips')?'tips':(curTab==='places')?'places':null;
+  if(!key){toast('장소·특산물·팁 탭에서 사용하세요');return;}
+  const label={places:'장소',products:'특산물',tips:'팁'}[key];
+  if(!confirm(label+' 전체를 삭제할까요? 되돌릴 수 없어요.'))return;
+  toast('삭제 중…');
+  try{
+    const snap=await fdb.collection(COL[key]).get({source:'server'});
+    let n=0;for(const d of snap.docs){try{await d.ref.delete();n++;}catch(e){}}
+    toast(label+' '+n+'개 삭제됨');
+  }catch(e){toast('삭제에 실패했어요');}
+});
+
 /* ============ 공용 데이터 시드 (델리·그레이터 노이다) ============ */
 const SEED_PLACES=[
   {cat:'sight',name:'Lotus Temple',addr:'Kalkaji, New Delhi',time:'차로 28분',price:'무료',open:'09:00–17:30',review:'연꽃 모양 바하이 사원. 입장 무료, 명상 공간.',stars:4.6},
@@ -1015,6 +1111,7 @@ async function init(){
     myUid=u.uid;
     if(!_subscribed){_subscribed=true;subscribe();}
     else{renderPlaces();renderGoods();renderTips();}
+    checkAdmin();
   });
   fbAuth.signInAnonymously().catch(e=>{console.warn('auth',e);toast('서버 연결 실패 — 잠시 후 새로고침');});
 }
