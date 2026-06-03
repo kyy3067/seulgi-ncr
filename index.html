@@ -574,22 +574,51 @@ function parsePhotos(p){
 }
 function packPhotos(arr){arr=(arr||[]).filter(Boolean);return arr.length===0?null:(arr.length===1?arr[0]:JSON.stringify(arr));}
 
-/* ============ Image resize ============ */
-function resizeImage(file,max=800,quality=.6){
+/* ============ Image resize (+ HEIC/HEIF 변환) ============ */
+function isHeic(file){
+  const t=((file&&file.type)||'').toLowerCase(), n=((file&&file.name)||'').toLowerCase();
+  return t.indexOf('heic')>=0||t.indexOf('heif')>=0||/\.(heic|heif)$/.test(n);
+}
+let _heicP=null;
+function loadHeic(){
+  if(window.heic2any)return Promise.resolve();
+  if(!_heicP)_heicP=new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+    s.onload=()=>res();
+    s.onerror=()=>{_heicP=null;rej(new Error('heic-lib'));};
+    document.head.appendChild(s);
+  });
+  return _heicP;
+}
+async function resizeImage(file,max=800,quality=.6){
+  // 아이폰 HEIC/HEIF: 브라우저가 직접 디코드 못 하므로 JPEG로 먼저 변환
+  if(isHeic(file)){
+    await loadHeic();
+    let out=await window.heic2any({blob:file,toType:'image/jpeg',quality:0.82});
+    if(Array.isArray(out))out=out[0];
+    file=new File([out],'photo.jpg',{type:'image/jpeg'});
+  }
   return new Promise((res,rej)=>{
     const reader=new FileReader();
+    const to=setTimeout(()=>rej(new Error('timeout')),20000);
     reader.onload=e=>{
       const img=new Image();
       img.onload=()=>{
-        let w=img.width,h=img.height;
-        if(w>h&&w>max){h=h*max/w;w=max;}else if(h>=w&&h>max){w=w*max/h;h=max;}
-        const c=document.createElement('canvas');c.width=w;c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        res(c.toDataURL('image/jpeg',quality));
+        clearTimeout(to);
+        try{
+          let w=img.width,h=img.height;
+          if(w>h&&w>max){h=h*max/w;w=max;}else if(h>=w&&h>max){w=w*max/h;h=max;}
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          res(c.toDataURL('image/jpeg',quality));
+        }catch(err){rej(err);}
       };
-      img.onerror=rej;img.src=e.target.result;
+      img.onerror=()=>{clearTimeout(to);rej(new Error('decode'));};
+      img.src=e.target.result;
     };
-    reader.onerror=rej;reader.readAsDataURL(file);
+    reader.onerror=()=>{clearTimeout(to);rej(new Error('read'));};
+    reader.readAsDataURL(file);
   });
 }
 
@@ -1049,12 +1078,18 @@ function bindPhoto(){
     const room=MAX_PHOTOS-sheetPhotos.length;
     if(room<=0){toast(`사진은 최대 ${MAX_PHOTOS}장까지예요`);file.value='';return;}
     const use=files.slice(0,room);
-    toast(files.length>room?`최대 ${MAX_PHOTOS}장 — ${use.length}장만 추가돼요`:'사진 처리 중…');
+    let added=0,failed=0;
+    toast(use.some(isHeic)?'사진 처리 중… (HEIC 변환은 시간이 걸려요)':'사진 처리 중…');
     for(const f of use){
-      try{const d=await resizeImage(f);sheetPhotos.push(d);renderPhotoGrid();}
-      catch(err){toast('일부 사진을 불러오지 못했어요');}
+      if(!/^image\//i.test(f.type||'')&&!isHeic(f)){failed++;continue;}
+      try{const d=await resizeImage(f);sheetPhotos.push(d);renderPhotoGrid();added++;}
+      catch(err){failed++;}
     }
     file.value='';
+    if(failed&&!added)toast('사진을 불러오지 못했어요 (지원되지 않는 형식이거나 연결 문제)');
+    else if(failed)toast(`${added}장 추가 · ${failed}장 실패`);
+    else if(files.length>room)toast(`최대 ${MAX_PHOTOS}장 — ${added}장만 추가됐어요`);
+    else toast(`${added}장 추가됨`);
   });
 }
 /* ---- 지도 위치 선택 (Leaflet + OSM, 좌표는 구글맵 길찾기에 사용) ---- */
