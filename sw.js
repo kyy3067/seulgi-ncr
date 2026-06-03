@@ -1,7 +1,7 @@
 /* 슬기로운 NCR — service worker
    전략: 화면(HTML)은 network-first → 온라인이면 항상 최신 반영,
         오프라인이면 캐시 폴백. 기타 자원은 stale-while-revalidate. */
-const VERSION = 'ncr-v8';
+const VERSION = 'ncr-v9';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -19,6 +19,8 @@ self.addEventListener('fetch', e => {
   const host = new URL(req.url).hostname;
   // Firebase(실시간 DB·인증)는 서비스워커가 가로채지 않음 — 캐시로 인한 동기화 오류 방지
   if (host.endsWith('googleapis.com') || host.endsWith('firebaseapp.com') || host.endsWith('firebaseio.com')) return;
+  // 지도 타일·지오코딩(OSM)도 가로채지 않음(캐시 비대 방지)
+  if (host.endsWith('openstreetmap.org')) return;
   // 환율 API는 캐시하지 않고 항상 네트워크 우선(오프라인이면 캐시 폴백)
   const fxHosts = ['open.er-api.com', 'api.frankfurter.app', 'api.frankfurter.dev'];
   if (fxHosts.includes(host)) {
