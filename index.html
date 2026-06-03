@@ -801,9 +801,14 @@ function openSheet(tab,item){
       <label class="field"><span class="lbl">구분</span><div class="sheet-chips" id="catChips">${chipsHTML(PLACE_CATS.filter(c=>c.id!=='all'),sheetCat,true)}</div></label>
       <label class="field"><span class="lbl">이름<span class="req"> *</span></span><input class="inp" id="f_name" placeholder="예: Bukhara" value="${esc(item?item.name:'')}"></label>
       <label class="field"><span class="lbl">별점</span><div class="star-pick" id="starPick">${[1,2,3,4,5].map(n=>`<button type="button" data-star="${n}" class="${n<=sheetStars?'on':''}">${icon('star','fill',28)}</button>`).join('')}</div></label>
-      <label class="field"><span class="lbl">주소 / 위치</span><input class="inp" id="f_addr" placeholder="지도에서 위치를 찍으면 자동 입력돼요" value="${esc(item?item.addr:'')}"></label>
+      <div class="field"><span class="lbl">주소 / 위치</span>
+        <div class="map-search">
+          <input class="inp" id="f_addr" placeholder="주소를 직접 입력하세요 (지도 없이 저장 OK)" value="${esc(item?item.addr:'')}">
+          <button type="button" class="btn-geo" id="f_addrGeo">${icon('travel_explore','',18)}지도표시</button>
+        </div>
+      </div>
       <div class="field">
-        <span class="lbl">지도에서 위치 지정 <span style="font-weight:500;color:var(--text-tertiary)">· 찍으면 지역 자동 추천</span></span>
+        <span class="lbl">지도에서 위치 지정 (선택) <span style="font-weight:500;color:var(--subtext)">· 찍으면 주소 자동 추천</span></span>
         <div class="map-search">
           <input class="inp" id="f_mapSearch" placeholder="장소·지역 검색 후 Enter">
           <button type="button" class="btn-geo" id="f_geo">${icon('my_location','',18)}내 위치</button>
@@ -819,7 +824,7 @@ function openSheet(tab,item){
       <label class="field"><span class="lbl">영업시간</span><input class="inp" id="f_open" placeholder="예: 영업 중 · ~23:00" value="${esc(item?item.open:'')}"></label>
       <label class="field"><span class="lbl">리뷰 / 한줄평</span><textarea class="inp" id="f_review" placeholder="음식·분위기·추천 메뉴 등">${esc(item?item.review:'')}</textarea></label>
       ${photoFieldHTML()}`;
-    bindCatChips();bindStarPick();bindPhoto();initPickMap();
+    bindCatChips();bindStarPick();bindPhoto();initPickMap();bindAddrGeo();
   }else if(tab==='goods'){
     body.innerHTML=`
       <label class="field"><span class="lbl">특산물 이름<span class="req"> *</span></span><input class="inp" id="f_name" placeholder="예: 다즐링 홍차" value="${esc(item?item.name:'')}"></label>
@@ -924,6 +929,28 @@ async function geoSearch(q){
     if(j&&j[0]){const lat=parseFloat(j[0].lat),lng=parseFloat(j[0].lon);setPick(lat,lng,true);pickMap.setView([lat,lng],16);}
     else toast('검색 결과가 없어요');
   }catch(e){toast('검색에 실패했어요');}
+}
+/* ---- 직접 입력한 주소를 지도 핀으로 (선택) — 좌표를 못 찾아도 주소 텍스트만으로 저장·길찾기 가능 ---- */
+function bindAddrGeo(){
+  const b=document.getElementById('f_addrGeo');
+  if(b)b.addEventListener('click',geoFromAddr);
+}
+async function geoFromAddr(){
+  const addrEl=document.getElementById('f_addr');
+  const q=(addrEl?addrEl.value:'').trim();
+  if(!q){toast('먼저 주소를 입력하세요');return;}
+  if(typeof L==='undefined'||!pickMap){toast('지도 없이도 주소 그대로 저장돼요');return;}
+  toast('주소로 위치 찾는 중…');
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=ko&q=${encodeURIComponent(q)}`,{headers:{'Accept':'application/json'}});
+    const j=await r.json();
+    if(j&&j[0]){
+      const lat=parseFloat(j[0].lat),lng=parseFloat(j[0].lon);
+      setPick(lat,lng,false); // 입력한 주소 텍스트는 덮어쓰지 않음
+      pickMap.setView([lat,lng],16);
+      toast('지도에 위치를 표시했어요');
+    }else toast('정확한 위치는 못 찾았어요. 주소 그대로 저장해도 길찾기는 돼요');
+  }catch(e){toast('검색 실패 — 주소는 그대로 저장돼요');}
 }
 document.getElementById('sheetSave').addEventListener('click',async()=>{
   if(!myUid){toast('연결 중이에요. 잠시 후 다시 시도해 주세요');return;}
