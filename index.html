@@ -294,6 +294,12 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 .photo-thumb{position:relative; width:72px; height:72px; border-radius:var(--radius-sm); overflow:hidden; background:var(--surface2); flex-shrink:0;}
 .photo-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
 .photo-del{position:absolute; top:3px; right:3px; width:22px; height:22px; border:none; border-radius:999px; background:rgba(15,16,25,.62); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;}
+/* 메인 사진: 0번 썸네일에 강조 테두리 + '메인' 뱃지(좌하단), 나머지엔 '메인 지정' 별 버튼(좌하단) */
+.photo-thumb.is-main{box-shadow:0 0 0 2px var(--accent);}
+.photo-main-badge{position:absolute; left:4px; bottom:4px; display:inline-flex; align-items:center; gap:2px; background:var(--accent); color:var(--accent-ink); font-size:10px; font-weight:700; padding:2px 6px 2px 5px; border-radius:999px; pointer-events:none;}
+.photo-main-badge .msr{font-size:11px;}
+.photo-star{position:absolute; left:4px; bottom:4px; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border:none; border-radius:999px; background:rgba(15,16,25,.62); color:#fff; cursor:pointer; padding:0;}
+.photo-star .msr{font-size:14px;}
 .pcard-photo-cell{position:relative; flex-shrink:0; align-self:stretch; display:flex;}
 .gcard-photo-cell{position:relative;}
 .photo-badge{position:absolute; right:6px; bottom:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(15,16,25,.62); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px; pointer-events:none;}
@@ -629,6 +635,7 @@ const PLACE_CATS=[
   {id:'cafe',label:'카페',icon:'local_cafe'},
   {id:'bar',label:'술집',icon:'local_bar'},
   {id:'sight',label:'명소',icon:'photo_camera'},
+  {id:'golf',label:'골프',icon:'golf_course'},
   {id:'stay',label:'숙소',icon:'hotel'},
   {id:'shop',label:'쇼핑',icon:'shopping_bag'},
   {id:'barber',label:'이발소',icon:'content_cut'},
@@ -647,7 +654,7 @@ const NAV=[
 
 /* ============ State ============ */
 const MAX_PHOTOS=6; // 장소·특산물당 최대 사진 수 (Firestore 1MB 문서 제한 고려)
-let state={places:[],products:[],tips:[],rate:15.7};
+let state={places:[],products:[],tips:[],rate:15.7,pinned:[]};
 let curTab='exchange';
 let placeFilter='all';
 let placeQuery='';
@@ -820,6 +827,9 @@ function placeCardHTML(p){
   const tel=p.contact?`<a class="tool" href="tel:${esc(String(p.contact).replace(/[^+\d]/g,''))}">${icon('call','',16)}전화</a>`:'';
   const own=isAdminMode||(p.ownerUid&&p.ownerUid===myUid);
   const ownTools=own?`<button class="tool" data-edit-place="${p.id}">${icon('edit','',16)}수정</button><button class="tool danger" data-del-place="${p.id}">${icon('delete','',16)}삭제</button>`:'';
+  // 관리자 전용: 둘러보기 목록 상단 고정 토글
+  const isPinned=Array.isArray(state.pinned)&&state.pinned.includes(p.id);
+  const pinTool=isAdminMode?`<button class="tool${isPinned?' tool-go':''}" data-pin-place="${p.id}">${icon('push_pin',isPinned?'fb':'',16)}${isPinned?'고정 해제':'상단 고정'}</button>`:'';
   return `<div class="card pcard" data-pid="${p.id}"><div class="pcard-inner">
     ${photo}
     <div class="pcard-body">
@@ -835,6 +845,7 @@ function placeCardHTML(p){
         <a class="tool" href="${mapUrl}" target="_blank" rel="noopener">${icon('map','',16)}지도</a>
         ${tel}
         <a class="tool tool-go" href="${dirUrl}" target="_blank" rel="noopener">${icon('near_me','fb',16)}길찾기</a>
+        ${pinTool}
         ${ownTools}
       </div>
     </div>
@@ -853,9 +864,16 @@ function renderPlaces(){
     list.innerHTML=`<div class="empty">${icon('travel_explore','',40)}<p>${placeQuery||placeFilter!=='all'?'해당하는 장소가 아직 없어요':'아직 등록된 곳이 없어요.<br>오른쪽 아래 + 버튼으로 추가해 보세요.'}</p></div>`;
     return;
   }
+  // 관리자 상단 고정: 고정된 가게를 핀 순서대로 맨 위로 (삭제된 ID는 자동 제외)
+  if(Array.isArray(state.pinned)&&state.pinned.length){
+    const set=new Set(state.pinned);
+    const head=state.pinned.map(id=>arr.find(p=>p.id===id)).filter(Boolean);
+    arr=head.concat(arr.filter(p=>!set.has(p.id)));
+  }
   list.innerHTML=arr.map(placeCardHTML).join('');
   list.querySelectorAll('[data-edit-place]').forEach(b=>b.addEventListener('click',()=>openSheet('places',state.places.find(x=>x.id===b.dataset.editPlace))));
   list.querySelectorAll('[data-del-place]').forEach(b=>b.addEventListener('click',()=>delPlace(b.dataset.delPlace)));
+  list.querySelectorAll('[data-pin-place]').forEach(b=>b.addEventListener('click',()=>togglePin(b.dataset.pinPlace)));
   list.querySelectorAll('[data-gal]').forEach(el=>el.addEventListener('click',()=>{const it=state.places.find(x=>x.id===el.dataset.gal);if(it)openGallery(parsePhotos(it.photo));}));
   list.querySelectorAll('.pcard').forEach(card=>card.addEventListener('click',e=>{
     if(e.target.closest('a,button,[data-gal]'))return; // 지도/전화/길찾기/사진 클릭은 각자 동작
@@ -905,6 +923,22 @@ function closeDetail(){navClose();}
 document.getElementById('detailClose').addEventListener('click',closeDetail);
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
 function delPlace(id){if(!confirm('이 장소를 삭제할까요?'))return;fdb.collection(COL.places).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
+/* 관리자: 둘러보기 상단 고정 토글 — 공용 config/featured 문서에 pinned 배열 저장 (실제 반영은 onSnapshot).
+   ※ 비밀번호 해시가 든 config/app(read:false)과 분리 — 이쪽은 공개 읽기라도 안전 */
+async function togglePin(id){
+  if(!isAdminMode){toast('관리자 모드에서만 사용할 수 있어요');return;}
+  const cur=Array.isArray(state.pinned)?state.pinned.slice():[];
+  const idx=cur.indexOf(id);
+  if(idx>=0)cur.splice(idx,1); else cur.unshift(id); // 새로 고정하면 맨 위(최상단)
+  try{
+    await fdb.collection('config').doc('featured').set({pinned:cur},{merge:true});
+    // 쓰기는 됐지만 읽기가 막힌 비대칭 규칙이면 목록이 갱신되지 않음 → 거짓 성공 대신 안내
+    if(_pinReadDenied)toast('저장됐지만 목록을 불러올 수 없어요 — 읽기 규칙 확인 필요');
+    else toast(idx>=0?'상단 고정을 해제했어요':'상단에 고정했어요');
+  }catch(e){
+    toast(e.code==='permission-denied'?'상단 고정은 Firestore 보안 규칙 업데이트가 필요해요':'변경에 실패했어요');
+  }
+}
 
 /* ============ Goods ============ */
 function goodsCardHTML(g){
@@ -1075,15 +1109,26 @@ function openSheetDom(tab,item){
   document.querySelector('.sheet').scrollTop=0;
 }
 function photoFieldHTML(){
-  return `<div class="field"><span class="lbl">사진 <span style="font-weight:500;color:var(--subtext)">· 여러 장 가능 (최대 ${MAX_PHOTOS}장)</span></span>
+  return `<div class="field"><span class="lbl">사진 <span style="font-weight:500;color:var(--subtext)">· 여러 장 가능 (최대 ${MAX_PHOTOS}장) · 별표를 눌러 메인 지정</span></span>
     <div class="photo-grid" id="f_photoGrid"></div>
     <div class="photo-drop" id="f_photoDrop">${icon('add_a_photo','',20)}사진 추가 / 촬영하기</div>
     <input type="file" id="f_photoFile" accept="image/*" multiple hidden></div>`;
 }
 function renderPhotoGrid(){
   const g=document.getElementById('f_photoGrid');if(!g)return;
-  g.innerHTML=sheetPhotos.map((src,i)=>`<div class="photo-thumb"><img src="${esc(src)}" alt=""><button type="button" class="photo-del" data-pi="${i}">${icon('close','',16)}</button></div>`).join('');
+  const multi=sheetPhotos.length>1;
+  g.innerHTML=sheetPhotos.map((src,i)=>{
+    // 0번 = 메인(커버). 사진이 2장 이상일 때만 메인 뱃지/지정 버튼 노출.
+    const mark = !multi ? '' : (i===0
+      ? `<span class="photo-main-badge">${icon('star','fill',11)}메인</span>`
+      : `<button type="button" class="photo-star" data-mainpi="${i}" title="메인으로 지정" aria-label="메인으로 지정">${icon('star','',14)}</button>`);
+    return `<div class="photo-thumb${(multi&&i===0)?' is-main':''}"><img src="${esc(src)}" alt="">${mark}<button type="button" class="photo-del" data-pi="${i}">${icon('close','',16)}</button></div>`;
+  }).join('');
   g.querySelectorAll('[data-pi]').forEach(b=>b.addEventListener('click',()=>{sheetPhotos.splice(+b.dataset.pi,1);renderPhotoGrid();}));
+  g.querySelectorAll('[data-mainpi]').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.mainpi;
+    if(i>0&&i<sheetPhotos.length){sheetPhotos.unshift(sheetPhotos.splice(i,1)[0]);renderPhotoGrid();toast('메인 사진으로 지정했어요');}
+  }));
   const drop=document.getElementById('f_photoDrop');
   if(drop)drop.style.display=(sheetPhotos.length>=MAX_PHOTOS)?'none':'flex';
 }
@@ -1445,6 +1490,7 @@ async function maybeSeed(key,snap){
   await seedCollection(key);
 }
 function bySeedOrder(a,b){return ((b.createdAt&&b.createdAt.seconds)||9e15)-((a.createdAt&&a.createdAt.seconds)||9e15);}
+let _pinReadWarned=false,_pinReadDenied=false;
 function subscribe(){
   const render={places:renderPlaces,products:renderGoods,tips:renderTips};
   Object.keys(COL).forEach(key=>{
@@ -1455,6 +1501,20 @@ function subscribe(){
       render[key]();
       maybeSeed(key,snap);
     },err=>{console.warn('snapshot',key,err);});
+  });
+  // 관리자 상단 고정 목록 (모든 사용자 공통) — config/featured.pinned (codeHash와 분리된 공개 문서)
+  fdb.collection('config').doc('featured').onSnapshot(d=>{
+    _pinReadDenied=false;
+    const data=(d&&d.exists)?d.data():null;
+    state.pinned=(data&&Array.isArray(data.pinned))?data.pinned.filter(x=>typeof x==='string'&&x):[];
+    renderPlaces();
+  },err=>{
+    console.warn('snapshot config',err);
+    // 읽기 거부는 무조건 기록(togglePin이 '저장됐지만 반영 안 됨'을 감지하도록). 비대칭 규칙(쓰기O/읽기X) 대비.
+    if(err&&err.code==='permission-denied')_pinReadDenied=true;
+    state.pinned=[];renderPlaces();
+    // 일반 사용자에겐 조용히 무시. 관리자에겐 규칙 안내(1회).
+    if(_pinReadDenied&&isAdminMode&&!_pinReadWarned){_pinReadWarned=true;toast('상단 고정 설정을 불러올 수 없어요 — 보안 규칙 확인 필요');}
   });
 }
 
