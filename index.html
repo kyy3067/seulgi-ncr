@@ -27,6 +27,8 @@
   --accent-soft:#ebecfa; --accent-shadow:rgba(91,99,211,.32);
   --radius:18px; --radius-sm:12px; --chip-radius:999px;
   --head-weight:800; --shadow:0 4px 16px rgba(20,22,45,.06);
+  /* ===== 출장 안내(입국절차·비상연락) — PPT 디자인 톤 ===== */
+  --ppt-navy:#1f2d50; --ppt-gold:#c9a227; --emg-red:#d34d3f; --danger:#cf4d4d;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;height:100%;}
@@ -341,6 +343,75 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
 #adminCancel{border:1px solid var(--border); background:var(--surface); color:var(--text);}
 #adminOk{border:none; background:var(--accent); color:var(--accent-ink);}
 
+/* ===== 출장 안내 화면 (입국절차 · 비상연락) ===== */
+.info-wrap{display:flex; flex-direction:column; gap:14px; padding:4px 16px 28px;}
+.info-section-title{display:flex; align-items:center; gap:9px; margin:10px 2px 0; font-size:16.5px; font-weight:800; letter-spacing:-.01em; color:var(--ppt-navy);}
+.info-section-title .num{flex-shrink:0; min-width:26px; height:26px; padding:0 7px; border-radius:8px; background:var(--ppt-navy); color:#fff; font-size:13px; font-weight:800; display:inline-flex; align-items:center; justify-content:center;}
+.info-section-title .en{font-size:11.5px; font-weight:600; color:var(--subtext);}
+/* STEP 카드 */
+.step-card{display:flex; align-items:flex-start; gap:13px; padding:14px 15px;}
+.step-no{flex-shrink:0; width:38px; height:38px; border-radius:11px; background:var(--accent-soft); color:var(--ppt-gold); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1;}
+.step-no .k{font-size:8px; font-weight:800; letter-spacing:.08em; color:var(--subtext);}
+.step-no .n{font-size:18px; font-weight:800; color:var(--ppt-navy);}
+.step-body{flex:1; min-width:0;}
+.step-body .t{font-size:14.5px; font-weight:700; color:var(--text);}
+.step-body .d{margin-top:3px; font-size:13px; color:var(--subtext); line-height:1.5;}
+/* 링크 버튼 / 주소·메모 카드 */
+.info-link{display:flex; align-items:center; justify-content:center; gap:8px; height:48px; border-radius:var(--radius-sm); background:var(--accent); color:var(--accent-ink); font-size:14.5px; font-weight:700; text-decoration:none; box-shadow:0 8px 24px var(--accent-shadow);}
+.addr-card{padding:13px 15px;}
+.addr-card .h{display:flex; align-items:center; gap:7px; font-size:13.5px; font-weight:700; color:var(--text);}
+.addr-card .h .msr{color:var(--accent);}
+.addr-card .a{margin:6px 0 0; font-size:13.5px; color:var(--subtext); line-height:1.55; white-space:pre-line;}
+.addr-card .copy{margin-top:9px; display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--surface2); color:var(--text); border-radius:999px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;}
+.addr-card .copy .msr{color:var(--accent);}
+.note-line{display:flex; align-items:flex-start; gap:9px; padding:12px 14px; border-radius:var(--radius-sm); background:var(--accent-soft); font-size:13px; line-height:1.55; color:var(--text);}
+.note-line.warn{background:#fdf1ec; color:#92492f;}
+.note-line .ic{flex-shrink:0; font-size:15px; line-height:1.4;}
+.note-line a{color:var(--accent); font-weight:700; text-decoration:none;}
+/* 긴급 배너 */
+.emg-banner{display:flex; align-items:center; gap:11px; padding:14px 16px; border-radius:var(--radius); background:var(--emg-red); color:#fff; text-decoration:none; box-shadow:0 8px 24px rgba(211,77,63,.32);}
+.emg-banner .msr{font-size:24px;}
+.emg-banner .tx{flex:1; min-width:0;}
+.emg-banner .tx .l{font-size:12.5px; font-weight:600; opacity:.92;}
+.emg-banner .tx .p{font-size:17px; font-weight:800; letter-spacing:.01em; margin-top:1px;}
+/* 연락처 목록 */
+.contact-list{overflow:hidden;}
+.contact-row{display:flex; align-items:center; gap:11px; padding:12px 14px; border-top:1px solid var(--border);}
+.contact-row:first-child{border-top:none;}
+.contact-row .ci{flex:1; min-width:0;}
+.contact-row .nm{font-size:14.5px; font-weight:700; color:var(--text);}
+.contact-row .nm .role{font-size:11.5px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:2px 8px; border-radius:999px; margin-left:6px; white-space:nowrap;}
+.contact-row .sub{margin-top:2px; font-size:12px; color:var(--subtext); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.contact-row .call{flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:12px; background:var(--ok); color:#fff; text-decoration:none;}
+.contact-row.lead .call{background:var(--emg-red);}
+/* 지정병원 카드 (네이비) */
+.hospital-card{padding:15px 16px; background:var(--ppt-navy); color:#fff; border:none;}
+.hospital-card .h{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#cfe0ff;}
+.hospital-card .nm{margin-top:7px; font-size:17px; font-weight:800;}
+.hospital-card .meta{margin-top:5px; font-size:12.5px; color:#aebbd6;}
+.hospital-card .addr{margin-top:9px; font-size:12.5px; line-height:1.5; color:#d6deec; display:flex; gap:6px;}
+.hospital-card .addr .msr{color:#8fb4ff; flex-shrink:0;}
+.hospital-card .acts{display:flex; gap:8px; margin-top:13px;}
+.hospital-card .acts a{flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:42px; border-radius:var(--radius-sm); font-family:inherit; font-size:13.5px; font-weight:700; text-decoration:none;}
+.hospital-card .acts .map{background:rgba(255,255,255,.16); color:#fff;}
+.hospital-card .acts .go{background:#fff; color:var(--ppt-navy);}
+/* 비상 대응 절차 */
+.resp-where{display:flex; align-items:center; gap:8px; margin:12px 2px 2px; font-size:15px; font-weight:800; color:var(--ppt-navy);}
+.resp-grid{display:flex; flex-direction:column; gap:10px;}
+.resp-col{padding:13px 15px;}
+.resp-col .lv{display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:800;}
+.resp-col.mild .lv{color:var(--ok);}
+.resp-col.severe .lv{color:var(--danger);}
+.resp-col .dot{width:9px; height:9px; border-radius:999px;}
+.resp-col.mild .dot{background:var(--ok);}
+.resp-col.severe .dot{background:var(--danger);}
+.resp-col ol{margin:9px 0 0; padding:0; list-style:none; counter-reset:s;}
+.resp-col ol li{position:relative; padding:0 0 0 26px; margin-top:8px; font-size:13px; line-height:1.5; color:var(--text); counter-increment:s;}
+.resp-col ol li:first-child{margin-top:0;}
+.resp-col ol li::before{content:counter(s); position:absolute; left:0; top:0; width:18px; height:18px; border-radius:999px; background:var(--surface2); color:var(--subtext); font-size:10.5px; font-weight:800; display:flex; align-items:center; justify-content:center;}
+.resp-col.mild ol li::before{background:#e4f4ec; color:var(--ok);}
+.resp-col.severe ol li::before{background:#fbe7e7; color:var(--danger);}
+@media(min-width:560px){.resp-grid{flex-direction:row;}.resp-grid .resp-col{flex:1;}}
 
 /* ===== Toast ===== */
 .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:#fff; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); white-space:nowrap; pointer-events:none;}
@@ -475,6 +546,18 @@ textarea.inp{height:76px; padding:12px 14px; resize:none; line-height:1.5;}
       <div class="screen-head"><h1>나의 팁 노트</h1><p>현지에서 얻은 정보를 자유롭게 기록</p></div>
       <div class="chip-row" id="tipCats"></div>
       <div class="list" id="tipList"></div>
+    </section>
+
+    <!-- ===== 입국절차 ===== -->
+    <section id="view-entry" class="view">
+      <div class="screen-head"><h1>입국 절차</h1><p>인도 전자 입국 신청 · 공항 픽업 안내</p></div>
+      <div class="info-wrap" id="entryBody"></div>
+    </section>
+
+    <!-- ===== 드림텍 비상연락망 ===== -->
+    <section id="view-emergency" class="view">
+      <div class="screen-head"><h1>드림텍 비상연락망</h1><p>긴급 연락처 · 지정병원 · 비상 대응 절차</p></div>
+      <div class="info-wrap" id="emergencyBody"></div>
     </section>
   </main>
 
@@ -650,6 +733,8 @@ const NAV=[
   {id:'places',label:'둘러보기',icon:'explore'},
   {id:'goods',label:'특산물',icon:'redeem'},
   {id:'tips',label:'팁',icon:'sticky_note_2'},
+  {id:'entry',label:'입국절차',icon:'flight_takeoff'},
+  {id:'emergency',label:'비상연락',icon:'emergency'},
 ];
 
 /* ============ State ============ */
@@ -710,7 +795,7 @@ function switchTab(tab){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+tab).classList.add('active');
   const fab=document.getElementById('fab');
-  fab.style.display=(tab==='exchange')?'none':'flex';
+  fab.style.display=['places','goods','tips'].includes(tab)?'flex':'none'; // 정적 화면(환율·입국절차·비상연락)은 + 버튼 숨김
   document.getElementById('fabLabel').textContent=tab==='goods'?'특산물':tab==='tips'?'팁':'장소';
   document.querySelector('.content').scrollTop=0;
 }
@@ -1029,6 +1114,86 @@ function renderTips(){
   list.querySelectorAll('[data-del-tip]').forEach(b=>b.addEventListener('click',()=>delTip(b.dataset.delTip)));
 }
 function delTip(id){if(!confirm('이 팁을 삭제할까요?'))return;fdb.collection(COL.tips).doc(id).delete().then(()=>toast('삭제되었어요')).catch(e=>toast(e.code==='permission-denied'?'본인이 올린 글만 삭제할 수 있어요':'삭제에 실패했어요'));}
+
+/* ============ 출장 안내 (입국절차 · 드림텍 비상연락망) — DS 고객사 출장 안내서 PPT 기반, 고정 콘텐츠 ============ */
+function telHref(p){return 'tel:'+String(p).replace(/[^+\d]/g,'');}
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast('주소를 복사했어요')).catch(()=>toast('복사하지 못했어요'));
+  else toast('이 기기에선 복사를 지원하지 않아요');
+}
+const MANAGER={name:'강동철',role:'관리센터장',phone:'+91 84481-84941'};
+const ENTRY_EARRIVAL_STEPS=[
+  {t:'신청 시점',d:'출발 24시간 ~ 72시간 전 권장 (도착 직전은 불가)'},
+  {t:'신청 방법',d:'모바일 스마트폰으로 간편하게 작성'},
+  {t:'신청 완료',d:'QR코드 저장 후 입국 심사 시 제시'},
+];
+const ENTRY_PICKUP_STEPS=[
+  {t:'입국 수속',d:'입국 심사 완료 후 개인 수화물 수취'},
+  {t:'4번 출구 이동',d:'게이트 4번 출구로 이동'},
+  {t:'운전기사 확인',d:'피켓 들고 대기 중인 기사 만나기'},
+  {t:'호텔 이동',d:'공항 주차장 도보 5분 → 호텔까지 약 90분'},
+];
+const EARRIVAL_URL='https://indianvisaonline.gov.in/earrival/';
+const ENTRY_ADDRS=[
+  {ic:'🏨',h:'숙소 주소 (Address for Declaration)',a:'Greater Noida, Uttar Pradesh\nGreater Noida, 201306 India'},
+  {ic:'🏭',h:'드림텍 법인 주소 (Company Address)',a:'PLOT NO-95, ECOTECH-10,\nGreater Noida, Uttar Pradesh'},
+];
+const EMG_CONTACTS=[
+  {role:'법인장',name:'전홍근',phone:'+91-97737-10600',duty:'법인 총괄'},
+  {role:'DS 센터장',name:'구교설',phone:'+91-84481-84942',duty:'DS 사업 총괄'},
+  {role:'관리 센터장',name:'강동철',phone:'+91-84481-84941',duty:'출장 주관 / 비상연락 창구',lead:true},
+  {role:'환경안전팀장',name:'남윤표',phone:'+91-81300-19093',duty:'EHS / 안전 관리'},
+  {role:'현지총무리더',name:'Mr. Tiwari',phone:'+91-99582-50568',duty:'현지 총무 지원'},
+  {role:'한국어 통역',name:'Ms. Parul',phone:'+91-95602-75061',duty:'통역 지원'},
+];
+const HOSPITAL={name:'Fortis Hospital Greater Noida',meta:'호텔에서 약 15분 · 법인에서 약 14분',addr:'Block D, Industrial Area, Surajpur Site 4, Greater Noida, UP 201315'};
+const EMG_RESPONSE=[
+  {where:'숙소 내 발생 시',ic:'🏨',
+   mild:['관리 주재원에게 즉시 연락','지정 차량 배차 및 픽업','주재원 동행 → 지정 병원 → 진료'],
+   severe:['호텔담당 / 운전기사에게 즉시 연락','지정 병원 이송','동행자가 관리 주재원에게 보고','주재원 병원 이동 → 의사소견 확인 → 후속조치 (현지인 동행 必)']},
+  {where:'숙소 외 발생 시',ic:'🚶',
+   mild:['관리 주재원에게 즉시 연락','지정 차량 픽업','이동 중 주재원 보고 → 진료'],
+   severe:['지정 차량 / 우버 호출 → 즉시 병원 이동','동행자가 관리 주재원에게 즉시 보고','주재원 병원 이동 → 의사소견 확인 → 후속조치 (현지인 동행 必)']},
+];
+function stepCardsHTML(arr){return arr.map((s,i)=>`<div class="card step-card"><div class="step-no"><span class="k">STEP</span><span class="n">${i+1}</span></div><div class="step-body"><div class="t">${esc(s.t)}</div><div class="d">${esc(s.d)}</div></div></div>`).join('');}
+function renderEntry(){
+  const el=document.getElementById('entryBody');if(!el)return;
+  el.innerHTML=`
+    <div class="info-section-title"><span class="num">01</span>인도 전자 입국 신청 <span class="en">e-Arrival</span></div>
+    ${stepCardsHTML(ENTRY_EARRIVAL_STEPS)}
+    <a class="info-link" href="${EARRIVAL_URL}" target="_blank" rel="noopener">${icon('open_in_new','b',18)}전자 입국 신청하기</a>
+    ${ENTRY_ADDRS.map((x,i)=>`<div class="card addr-card"><div class="h">${x.ic} ${esc(x.h)}</div><div class="a">${esc(x.a)}</div><button class="copy" data-copy="${i}">${icon('content_copy','',14)}주소 복사</button></div>`).join('')}
+    <div class="note-line warn"><span class="ic">⚠</span><span>비자가 이미 있는 경우에도 e-Arrival 신청은 <b>별도로 필요</b>합니다.</span></div>
+    <div class="info-section-title"><span class="num">02</span>공항 픽업 안내 <span class="en">Airport Pickup</span></div>
+    ${stepCardsHTML(ENTRY_PICKUP_STEPS)}
+    <div class="note-line"><span class="ic">📞</span><span>픽업 기사 연락은 관리센터장(${esc(MANAGER.name)})을 통해 사전 조율됩니다. <a href="${telHref(MANAGER.phone)}">${esc(MANAGER.phone)}</a></span></div>
+    <div class="note-line"><span class="ic">⏰</span><span>공항 → 주차장 도보 약 5분 · 주차장 → Greater Noida 호텔 약 1시간 30분</span></div>`;
+  el.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{const x=ENTRY_ADDRS[+b.dataset.copy];if(x)copyText(x.a.replace(/\n/g,' '));}));
+}
+function renderEmergency(){
+  const el=document.getElementById('emergencyBody');if(!el)return;
+  const contacts=EMG_CONTACTS.map(c=>`<div class="contact-row${c.lead?' lead':''}"><div class="ci"><div class="nm">${esc(c.name)}<span class="role">${esc(c.role)}</span></div><div class="sub">${esc(c.duty)} · ${esc(c.phone)}</div></div><a class="call" href="${telHref(c.phone)}" aria-label="${esc(c.name)} 전화">${icon('call','fb',20)}</a></div>`).join('');
+  const resp=EMG_RESPONSE.map(r=>`
+    <div class="resp-where">${r.ic} ${esc(r.where)}</div>
+    <div class="resp-grid">
+      <div class="card resp-col mild"><div class="lv"><span class="dot"></span>경증 · 거동 가능</div><ol>${r.mild.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
+      <div class="card resp-col severe"><div class="lv"><span class="dot"></span>중증 · 거동 불가</div><ol>${r.severe.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
+    </div>`).join('');
+  el.innerHTML=`
+    <a class="emg-banner" href="${telHref(MANAGER.phone)}">${icon('emergency','fb',24)}<span class="tx"><span class="l">🚨 긴급 상황 시 즉시 연락 — ${esc(MANAGER.name)} ${esc(MANAGER.role)}</span><span class="p">${esc(MANAGER.phone)}</span></span>${icon('call','fb',20)}</a>
+    <div class="info-section-title"><span class="num">01</span>비상 연락망 <span class="en">Emergency Contacts</span></div>
+    <div class="card contact-list">${contacts}</div>
+    <div class="card hospital-card">
+      <div class="h">${icon('local_hospital','fb',16)}지정병원</div>
+      <div class="nm">${esc(HOSPITAL.name)}</div>
+      <div class="meta">${esc(HOSPITAL.meta)}</div>
+      <div class="addr">${icon('location_on','fb',15)}<span>${esc(HOSPITAL.addr)}</span></div>
+      <div class="acts"><a class="map" href="${mapsSearch(HOSPITAL.name+', '+HOSPITAL.addr)}" target="_blank" rel="noopener">${icon('map','',16)}지도</a><a class="go" href="${mapsDir(HOSPITAL.name+', '+HOSPITAL.addr)}" target="_blank" rel="noopener">${icon('near_me','fb',16)}길찾기</a></div>
+    </div>
+    <div class="info-section-title"><span class="num">02</span>비상 대응 절차 <span class="en">Emergency Response</span></div>
+    ${resp}
+    <div class="note-line"><span class="ic">🆘</span><span>긴급 연락: <a href="${telHref(MANAGER.phone)}">${esc(MANAGER.name)} ${esc(MANAGER.phone)}</a> · Fortis Hospital, Block D, Surajpur Site 4, Greater Noida</span></div>`;
+}
 
 /* ============ Add / Edit sheet ============ */
 const sheetOverlay=document.getElementById('sheetOverlay');
@@ -1522,6 +1687,7 @@ function subscribe(){
 let _subscribed=false;
 async function init(){
   buildNav();buildPlaceCats();buildTipCats();
+  renderEntry();renderEmergency(); // 고정 콘텐츠 1회 렌더
   state.rate=await load(KEYS.rate,15.7);
   renderRate();renderPlaces();renderGoods();renderTips();
   switchTab('exchange');
